@@ -1,0 +1,192 @@
+@font-face {
+    font-family: 'BR Hendrix';
+    src: url('BRHendrix-Light.eot');
+    src: local('BR Hendrix Light'), local('BRHendrix-Light'),
+        url('BRHendrix-Light.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-Light.woff2') format('woff2'),
+        url('BRHendrix-Light.woff') format('woff'),
+        url('BRHendrix-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'BR Hendrix Extra';
+    src: url('BRHendrix-ExtraLight.eot');
+    src: local('BR Hendrix Extra Light'), local('BRHendrix-ExtraLight'),
+        url('BRHendrix-ExtraLight.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-ExtraLight.woff2') format('woff2'),
+        url('BRHendrix-ExtraLight.woff') format('woff'),
+        url('BRHendrix-ExtraLight.ttf') format('truetype');
+    font-weight: 200;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'BR Hendrix';
+    src: url('BRHendrix-Black.eot');
+    src: local('BR Hendrix Black'), local('BRHendrix-Black'),
+        url('BRHendrix-Black.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-Black.woff2') format('woff2'),
+        url('BRHendrix-Black.woff') format('woff'),
+        url('BRHendrix-Black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'BR Hendrix Semi';
+    src: url('BRHendrix-SemiBoldItalic.eot');
+    src: local('BR Hendrix Semi Bold Italic'), local('BRHendrix-SemiBoldItalic'),
+        url('BRHendrix-SemiBoldItalic.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-SemiBoldItalic.woff2') format('woff2'),
+        url('BRHendrix-SemiBoldItalic.woff') format('woff'),
+        url('BRHendrix-SemiBoldItalic.ttf') format('truetype');
+    font-weight: 600;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'BR Hendrix';
+    src: url('BRHendrix-Regular.eot');
+    src: local('BR Hendrix'), local('BRHendrix-Regular'),
+        url('BRHendrix-Regular.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-Regular.woff2') format('woff2'),
+        url('BRHendrix-Regular.woff') format('woff'),
+        url('BRHendrix-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'BR Hendrix';
+    src: url('BRHendrix-Thin.eot');
+    src: local('BR Hendrix Thin'), local('BRHendrix-Thin'),
+        url('BRHendrix-Thin.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-Thin.woff2') format('woff2'),
+        url('BRHendrix-Thin.woff') format('woff'),
+        url('BRHendrix-Thin.ttf') format('truetype');
+    font-weight: 100;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'BR Hendrix';
+    src: url('BRHendrix-BoldItalic.eot');
+    src: local('BR Hendrix Bold Italic'), local('BRHendrix-BoldItalic'),
+        url('BRHendrix-BoldItalic.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-BoldItalic.woff2') format('woff2'),
+        url('BRHendrix-BoldItalic.woff') format('woff'),
+        url('BRHendrix-BoldItalic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'BR Hendrix';
+    src: url('BRHendrix-MediumItalic.eot');
+    src: local('BR Hendrix Medium Italic'), local('BRHendrix-MediumItalic'),
+        url('BRHendrix-MediumItalic.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-MediumItalic.woff2') format('woff2'),
+        url('BRHendrix-MediumItalic.woff') format('woff'),
+        url('BRHendrix-MediumItalic.ttf') format('truetype');
+    font-weight: 500;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'BR Hendrix Extra';
+    src: url('BRHendrix-ExtraLightItalic.eot');
+    src: local('BR Hendrix Extra Light Italic'), local('BRHendrix-ExtraLightItalic'),
+        url('BRHendrix-ExtraLightItalic.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-ExtraLightItalic.woff2') format('woff2'),
+        url('BRHendrix-ExtraLightItalic.woff') format('woff'),
+        url('BRHendrix-ExtraLightItalic.ttf') format('truetype');
+    font-weight: 200;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'BR Hendrix';
+    src: url('BRHendrix-RegularItalic.eot');
+    src: local('BR Hendrix Italic'), local('BRHendrix-RegularItalic'),
+        url('BRHendrix-RegularItalic.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-RegularItalic.woff2') format('woff2'),
+        url('BRHendrix-RegularItalic.woff') format('woff'),
+        url('BRHendrix-RegularItalic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'BR Hendrix Semi';
+    src: url('BRHendrix-SemiBold.eot');
+    src: local('BR Hendrix Semi Bold'), local('BRHendrix-SemiBold'),
+        url('BRHendrix-SemiBold.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-SemiBold.woff2') format('woff2'),
+        url('BRHendrix-SemiBold.woff') format('woff'),
+        url('BRHendrix-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'BR Hendrix';
+    src: url('BRHendrix-BlackItalic.eot');
+    src: local('BR Hendrix Black Italic'), local('BRHendrix-BlackItalic'),
+        url('BRHendrix-BlackItalic.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-BlackItalic.woff2') format('woff2'),
+        url('BRHendrix-BlackItalic.woff') format('woff'),
+        url('BRHendrix-BlackItalic.ttf') format('truetype');
+    font-weight: 900;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'BR Hendrix';
+    src: url('BRHendrix-ThinItalic.eot');
+    src: local('BR Hendrix Thin Italic'), local('BRHendrix-ThinItalic'),
+        url('BRHendrix-ThinItalic.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-ThinItalic.woff2') format('woff2'),
+        url('BRHendrix-ThinItalic.woff') format('woff'),
+        url('BRHendrix-ThinItalic.ttf') format('truetype');
+    font-weight: 100;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'BR Hendrix';
+    src: url('BRHendrix-Bold.eot');
+    src: local('BR Hendrix Bold'), local('BRHendrix-Bold'),
+        url('BRHendrix-Bold.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-Bold.woff2') format('woff2'),
+        url('BRHendrix-Bold.woff') format('woff'),
+        url('BRHendrix-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'BR Hendrix';
+    src: url('BRHendrix-LightItalic.eot');
+    src: local('BR Hendrix Light Italic'), local('BRHendrix-LightItalic'),
+        url('BRHendrix-LightItalic.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-LightItalic.woff2') format('woff2'),
+        url('BRHendrix-LightItalic.woff') format('woff'),
+        url('BRHendrix-LightItalic.ttf') format('truetype');
+    font-weight: 300;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'BR Hendrix';
+    src: url('BRHendrix-Medium.eot');
+    src: local('BR Hendrix Medium'), local('BRHendrix-Medium'),
+        url('BRHendrix-Medium.eot?#iefix') format('embedded-opentype'),
+        url('BRHendrix-Medium.woff2') format('woff2'),
+        url('BRHendrix-Medium.woff') format('woff'),
+        url('BRHendrix-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
+

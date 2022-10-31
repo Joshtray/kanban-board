@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h2 class="section-title"><span>Kanban Board</span></h2>
+  <!-- <h1>{% block title %}Log In{% endblock %}</h1> -->
+{% endblock %}
+
+{% block content %}
+<section class="auth">
+  <h3 class="auth-info">Sign into your Kanban board!</h3>
+  <form class="auth-form" method="post">
+    <section class="form-input">
+      <label for="username">Username:</label>
+      <input type="text" name="username" id="username" required>
+    </section>
+    <section class="form-input">
+      <label for="password">Password:</label>
+      <input type="password" name="password" id="password" required>
+    </section>
+    <section class="form-input auth-submit">
+      <input class="submit-button" type="submit" value="Log In">
+    </section>
+    <span class="switch-request">Don't have one? <a href="{{ url_for('auth.register') }}">Sign up</a></span>
+  </form>
+</section>
+{% endblock %}

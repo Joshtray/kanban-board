@@ -1,0 +1,326 @@
+
+* {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+a {
+  color: #4a9cf9;
+  text-decoration: underline;
+}
+a:active {
+  color: red;
+}
+
+html {
+  overflow-y: auto;
+  background: #fff;
+}
+html.dragging body {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.nav-bar {
+  position: relative;
+  display: flex;
+  align-items: center; 
+  justify-content: center;
+  margin: 0 25px;
+}
+.section-title {
+  color: #2e64a1;
+  font-size: 26px;
+  font-weight: 700;
+  margin: 40px 0;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+}
+.section-title > span {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+}
+.section-title > span:after {
+  content: "";
+  background-color: #2e64a1;
+  display: block;
+  position: absolute;
+  left: 10px;
+  bottom: 0;
+  right: 10px;
+  height: 2px;
+}
+.account-nav {
+  position: absolute;
+  right: 0;
+  display: flex;
+  list-style: none;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.account-nav li {
+  /* display: flex; */
+  margin: 7px;
+  /* align-items: flex-end;
+  justify-content: flex-end; */
+}
+.account-nav li span {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+.account-nav li a {
+  font-size: 14px;
+  transition: 0.2s ease-in;
+}
+.account-nav li a:hover {
+  color: red;
+}
+body {
+  position: relative;
+  font-family: 'BR Hendrix';
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 0 20px;
+  color: #6e6e6e;
+  height: 100vh;
+}
+.flash {
+  color: red;
+  font-size: 14px;
+}
+.new-task {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  margin: 10px 1.5px 30px 0px;
+}
+.form-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 10px;
+}
+.form-input input {
+  padding: 10px;
+  width: 400px;
+  border-radius: 4px;
+  font-family: 'BR Hendrix';
+  cursor: text;
+  -webkit-box-shadow: 0px 1px 3px 0 rgba(0,0,0,0.2);
+  box-shadow: 0px 1px 3px 0 rgba(0,0,0,0.2);
+  border: none;
+  outline: transparent;
+  margin-bottom: 3px;
+  transition: 0.2s ease-in;
+}
+.form-input input:focus {
+  outline: solid #4a9cf9 1px;
+  box-shadow: 0px 1px 3px 0 rgba(74, 156, 249, 0.2);
+}
+.form-input label {
+  font-size: 14px;
+  font-weight: 500;
+}
+.form-submit {
+  margin: 10px;
+}
+.form-submit .submit-button {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  text-align: center;
+  font-size: 25px;
+  align-self: flex-start;
+  cursor: pointer;
+  transition: 0.15s ease-in;
+}
+.form-submit .submit-button:hover {
+  background-color: #4a9cf9;
+  color: white;
+}
+.form-submit .submit-button:active {
+  background-color: #2e64a1;
+}
+.board {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+}
+.board-column {
+  width: 30%;
+  margin: 0 1.5%;
+  background: #f0f0f0;
+  border-radius: 3px;
+  z-index: 1;
+  will-change: transform;
+}
+.board-column-header {
+  position: relative;
+  height: 50px;
+  line-height: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  overflow: hidden;
+  padding: 0 20px;
+  text-align: center;
+  background: #333;
+  color: #fff;
+  border-radius: 3px 3px 0 0;
+  font-weight: 600;
+}
+/* @media (max-width: 600px) {
+  .board-column-header {
+    text-indent: -1000px;
+  }
+} */
+.board-column.todo .board-column-header {
+  background: #4a9cf9;
+}
+.board-column.working .board-column-header {
+  background: #f9b94a;
+}
+.board-column.done .board-column-header {
+  background: #2ac06d;
+}
+.board-column-content {
+  position: relative;
+  border: 10px solid transparent;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+}
+.board-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 200px;
+  width: 100%;
+  margin: 7px 5px;
+  will-change: transform;
+  padding: 20px;
+  background: #fff;
+  border-radius: 4px;
+  font-size: 17px;
+  cursor: pointer;
+  -webkit-box-shadow: 0px 1px 3px 0 rgba(0,0,0,0.2);
+  box-shadow: 0px 1px 3px 0 rgba(0,0,0,0.2);
+
+}
+.board-item-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  margin-right: 20px;
+}
+.board-item-content .task {
+  overflow: hidden;
+  font-weight: 500;
+}
+.board-item-content .assignees {
+  font-size: 12px;
+  font-weight: 400;
+}
+.board-item-edit {
+  display: flex;
+  flex-direction: row;
+}
+.board-item-edit button {
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  margin: 3px;
+  text-align: center;
+  font-size: 15px;
+  cursor: pointer;
+  background-color: transparent;
+  transition: 0.15s ease-in;
+}
+.board-item-edit .delete {
+  font-size: 12px;
+}
+.board-item-edit button:hover {
+  background-color: #F0F0F0;
+}
+/* @media (max-width: 600px) {
+  .board-item-content {
+    text-align: center;
+  }
+  .board-item-content span {
+    display: none;
+  }
+} */
+.auth {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 30px;
+}
+.auth .auth-info {
+  font-weight: 600;
+  font-size: 24px;
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  margin: 10px 1.5px 30px 0px;
+}
+.auth-form .form-input {
+  align-items: flex-start;
+}
+.auth-form .form-input input {
+  font-size: 16px;
+}
+.auth-form .form-input label {
+  font-size: 18px;
+}
+.auth-submit .submit-button {
+  border: none;
+  text-align: center;
+  align-self: flex-start;
+  cursor: pointer;
+  transition: 0.15s ease-in;
+}
+
+.auth-submit .submit-button:hover {
+  background-color: #4a9cf9;
+  color: white;
+}
+.auth-submit .submit-button:active {
+  background-color: #2e64a1;
+}
+.auth-form .switch-request {
+  margin: 20px 10px;
+  font-size: 14px;
+}
+.auth-form .switch-request a {
+  margin: 5px;
+}
