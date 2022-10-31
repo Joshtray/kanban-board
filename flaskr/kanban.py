@@ -10,6 +10,10 @@ from flaskr.db import get_db
 
 bp = Blueprint('kanban', __name__)
 
+@bp.route("/script_js")
+def script_js():
+    return render_template("/js/script.js")
+
 @bp.route('/')
 @login_required
 def index():
@@ -27,7 +31,7 @@ def create():
     if request.method == 'POST':
         user_id = session.get('user_id')
         task = request.form['task']
-        group = "TODO"
+        group = "TO DO"
         assignees = request.form['assignees']
         error = None
 
@@ -61,16 +65,16 @@ def get_task(id):
 
     return task
 
-@bp.route('/<int:id>/update', methods=('GET', 'POST'))
+@bp.route('/update', methods=('GET', 'POST'))
 @login_required
-def update(id):
-    task = get_task(id)
+def update():
 
     if request.method == 'POST':
-        group = request.form['group']
+        id = request.args.get('id')
+        task = get_task(id)
+        group = request.form['group'].upper()
         error = None
 
-        print("PRINGING", id, group)
         if error is not None:
             flash(error)
         else:

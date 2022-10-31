@@ -166,7 +166,17 @@ body {
   margin: 0 1.5%;
   background: #f0f0f0;
   border-radius: 3px;
+  position: relative;
   /* z-index: 1; */
+}
+.board-column .container {
+  position: absolute;
+  top: 0;
+  border: solid black 1px;
+  background-color: transparent;
+  height: 100%;
+  width: 100%;
+  z-index: 0;
 }
 .board-column-header {
   height: 50px;
@@ -230,8 +240,6 @@ body {
 .static {
   position: absolute;
   height: 100%;
-  /* border-color: transparent;  */
-  /* border: none; */
   border: solid black 1px;
   background-color: transparent;
   box-shadow: none;  

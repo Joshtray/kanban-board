@@ -1,8 +1,10 @@
 <!doctype html>
-<title>Kanban Board</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='font/stylesheet.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<script src="/static/js/script.js"></script>
+<head>
+  <title>Kanban Board</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='font/stylesheet.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('kanban.script_js') }}"></script>
+</head>
 <section class="content">
   <header>
     {% block header %}{% endblock %}
