@@ -4,6 +4,13 @@ var initLeft = null
 var prev_table = null
 var static_holders = null
 
+window.addEventListener('resize', function () {
+  tasks = this.document.getElementsByClassName("board-item draggable");
+  for (let i = 0; i < tasks.length; i++) {
+    var task = tasks[i];
+    task.style.width = task.parentElement.style.width + "px";
+  }
+})
 window.addEventListener('load', function () {
   static_holders = document.getElementsByClassName("container")
   this.document.onmouseup = function(e) {
