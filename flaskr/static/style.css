@@ -172,7 +172,6 @@ body {
 .board-column .container {
   position: absolute;
   top: 0;
-  border: solid black 1px;
   background-color: transparent;
   height: 100%;
   width: 100%;
@@ -240,9 +239,10 @@ body {
 .static {
   position: absolute;
   height: 100%;
-  border: solid black 1px;
   background-color: transparent;
   box-shadow: none;  
+  border: none;
+  transition: box-shadow 0.2s ease-in-out;
   z-index: 0;
 }
 .board-item-content {
