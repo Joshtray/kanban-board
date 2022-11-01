@@ -69,10 +69,7 @@ html.dragging body {
 }
 
 .account-nav li {
-  /* display: flex; */
   margin: 7px;
-  /* align-items: flex-end;
-  justify-content: flex-end; */
 }
 .account-nav li span {
   font-size: 20px;
@@ -201,19 +198,18 @@ body {
 }
 .board-column-content {
   position: relative;
-  border: 10px solid transparent;
+  margin: 10px;
   min-height: 100px;
-  display: -ms-grid;
+  display: flex;
+  flex-direction:  column;
+  /* display: -ms-grid;
   display: grid;
   -ms-grid-rows: repeat(var(--length));
   grid-template-rows: repeat(var(--length));
   grid-row-gap: 7px;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr; */
 }
 .board-item-container {
-  grid-row-start: var(--position) + 0;
-  grid-row-end: var(--position) + 1;
-  grid-column: 1 / 2;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -226,7 +222,7 @@ body {
   align-items: center;
   min-width: 200px;
   width: 100%;
-  margin: 0px 5px;
+  margin: 5px 5px;
   padding: 20px;
   background: #fff;
   border-radius: 4px;

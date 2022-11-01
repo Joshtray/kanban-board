@@ -4,13 +4,6 @@ var initLeft = null
 var prev_table = null
 var static_holders = null
 
-window.addEventListener('resize', function () {
-  tasks = this.document.getElementsByClassName("board-item draggable");
-  for (let i = 0; i < tasks.length; i++) {
-    var task = tasks[i];
-    task.style.width = task.parentElement.style.width + "px";
-  }
-})
 window.addEventListener('load', function () {
   static_holders = document.getElementsByClassName("container")
   this.document.onmouseup = function(e) {
@@ -91,15 +84,22 @@ const handleMouseDown = (event, data, table) => {
           window.location.reload()
         }
       }
-      for (let i = 0; i < static_holders.length; i++) {
-        var static = static_holders[i];
-        static.style.zIndex = 0
+      else {
+        for (let i = 0; i < static_holders.length; i++) {
+          var static_holder = static_holders[i];
+          static_holder.style.zIndex = 0
+        }
+        var static = mouseDownPos.parentElement.children[1];
+        mouseDownPos.style.zIndex = 1;
+        mouseDownPos.style.top = initTop + "px";
+        mouseDownPos.style.left = initLeft + "px";
+        setTimeout(function () {        
+          static.style.position = "absolute";
+          mouseDownPos.style.position = "revert";
+          mouseDownPos.style.width = "100%";
+          static.style.boxShadow = "none";
+          mouseDownPos = null;
+        }, parseFloat(getComputedStyle(mouseDownPos)['transitionDuration'])*1000)
       }
-      mouseDownPos.style.zIndex = 1;
-      mouseDownPos.style.top = initTop + "px";
-      mouseDownPos.style.left = initLeft + "px";
-      mouseDownPos.position = "revert";
-      var static = mouseDownPos.parentElement.children[1];
-      static.style.boxShadow = "none";
     }
   }
