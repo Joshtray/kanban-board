@@ -23,10 +23,26 @@ html.dragging body {
   -ms-user-select: none;
   user-select: none;
 }
+h4 {
+  font-size: 16px;
+  margin: 30px 0px 10px;
+}
 .content {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+#overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: #6e6e6e;
+  opacity: 20%;
+  transition: 0.3s ease-in-out;
+  z-index: 4;
+  display: none;
 }
 .nav-bar {
   position: relative;
@@ -35,6 +51,18 @@ html.dragging body {
   justify-content: center;
   margin: 0 25px;
 }
+.board-menu-button {
+  position: absolute;
+  left: 0;
+  display: flex;
+  align-items: center;
+  font-size: 25px;
+  cursor: pointer;
+}
+.board-menu-button:hover {
+  color: #4a9cf9;
+}
+
 .section-title {
   color: #2e64a1;
   font-size: 26px;
@@ -95,6 +123,131 @@ body {
 .flash {
   color: red;
   font-size: 14px;
+}
+.board-menu {
+  position: fixed;
+  left: 0;
+  width: 0%;
+  height: 100%;
+  z-index: 5;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  background-color: white;
+  transition: 0.3s ease-in-out;
+}
+.board-menu .back {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 24px;
+  padding: 10px;
+  margin: 20px;
+  cursor: pointer;
+}
+.board-menu .back:hover {
+  color: #4a9cf9;
+}
+.board-menu .board-list {
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  list-style: none;
+  margin: 0px 10px;
+  padding: 30px;
+  transition: 0.2s ease-in-out;
+  width: 100%;
+}
+.board-menu .board-list .board-list-title {
+  margin: 30px 0px;
+}
+.board-menu .board-list form {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+}
+.board-menu .board-list form section {
+  display: none;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 1px 3px 0 rgba(0,0,0,0.2);
+  border-radius: 8px;
+  padding: 7px;
+  width: 0%;
+  transition: 0.2s ease-in-out;
+}
+.board-menu .board-list .add-board-form section input {
+  outline: none;
+  border: none;
+  font-family: 'BR Hendrix';
+  width: 100%;
+}
+.board-menu .board-list .add-board-form section .submit-button, .board-menu .board-list .add-board-form section .cancel {
+  display: none;
+  font-size: 12px;
+  outline: none;
+  border: none;
+  background-color: transparent;
+  margin: 3px;
+  transition: 0.2s ease-in-out;
+  cursor: pointer;
+  color: #9e9e9e;
+}
+.board-menu .board-list .add-board-form section .submit-button:hover {
+  color: rgb(0, 202, 0);
+}
+.board-menu .board-list .add-board-form section .cancel:hover {
+  color: red;
+}
+.board-menu .board-list .add-board-form .add-board {
+  display: flex;
+  height: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 14px;
+  color: #9e9e9e;
+  width: max-content;
+  padding: 5px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+.board-menu .board-list .add-board-form .add-board:hover {
+  color: #4a9cf9;
+}
+.board-menu .board-list .board-list-item {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  transition: 0.2s ease-in-out;
+  font-size: 14px;
+  margin: 3px;
+}
+.board-menu .board-list .board-list-item a {
+  text-decoration: none;
+}
+.board-menu .board-list .board-list-item form {
+  width: min-content;
+  height: min-content;
+}
+.board-menu .board-list .board-list-item .leave-board button {
+  background-color: transparent;
+  color: #9e9e9e;
+  --ggs: 0.8;
+  transition: 0.2s ease-in-out;
+  cursor: pointer;
+}
+.board-menu .board-list .board-list-item .leave-board button:hover {
+  color: red;
 }
 .new-task {
   display: flex;

@@ -9,6 +9,9 @@
 <section class="auth">
   <h3 class="auth-info">Sign into your Kanban board!</h3>
   <form class="auth-form" method="post">
+    {% for message in get_flashed_messages() %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
     <section class="form-input">
       <label for="username">Username:</label>
       <input type="text" name="username" id="username" required>

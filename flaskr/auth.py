@@ -25,8 +25,21 @@ def register():
         if error is None:
             try:
                 db.execute(
-                    "INSERT INTO user (username, password) VALUES (?, ?)",
-                    (username, generate_password_hash(password)),
+                    'INSERT INTO board (name)'
+                    f'VALUES ("{username}\'s Personal Board")',
+                )
+                personal_board_id = db.execute(
+                    'SELECT id FROM board b WHERE b.id = LAST_INSERT_ROWID()'
+                ).fetchone()[0]
+                print(personal_board_id, type(personal_board_id))
+                db.execute(
+                    "INSERT INTO user (username, password, personal_board) VALUES (?, ?, ?)",
+                    (username, generate_password_hash(password), personal_board_id)
+                )
+                db.execute(
+                    'INSERT INTO user_board (user_id, board_id)'
+                    ' VALUES (LAST_INSERT_ROWID(), ?)',
+                    (personal_board_id,)
                 )
                 db.commit()
             except db.IntegrityError:
