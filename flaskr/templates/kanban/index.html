@@ -16,8 +16,9 @@
 </nav>
 {% endblock %}
 
+
 {% block content %}
-<section class="overlay" id="overlay"></section>
+<section class="overlay" id="overlay" onclick="close_menu()"></section>
 <section class="board-menu" id="board-menu">
   <ul class="board-list">
     <h3 class="board-list-title">Your Boards:</h3>
@@ -57,8 +58,13 @@
   <i class="fa fa-arrow-left back" onclick="close_menu()"></i>
 </section>
 <section class="kanban-board">
-    <section>{{ board_name }}</section>
+    <h2>{{ board_name }}</h2>
     <i class="fa fa-user-plus add-user"></i>
+    <i class="fa fa-right-from-bracket"></i>
+    <i class="fa fa-arrow-right-from-bracket"></i>
+    <i class="fa-solid fa-person-walking-arrow-right"></i>
+    <i class="fa-regular fa-arrow-right-from-arc"></i>
+    <i class="fa fa-door-open"></i>
     <form class="new-user" action="{{ url_for('kanban.add_user', board_id=board_id) }}" method="post">
       <section class="form-input">
         {% for message in get_flashed_messages() %}
@@ -71,66 +77,52 @@
         <button type="submit" class="submit-button">+</button>
     </section>
     </form>
-    <form class="new-task" action="{{ url_for('kanban.create_task', board_id=board_id) }}" method="post">
-        <section class="form-input">
-            <input type="text" id="task" name="task" required />                                
-            <label for="task">Task:</label>
-        </section>
-        <section class="form-input">
-            <input type="text" id="assignees" name="assignees" />
-            <label for="assignees">Assignees:</label>
-        </section>
-        <section class="form-submit">
-            <button type="submit" class="submit-button">+</button>
-        </section>
-    </form>
     <div class="board">
-      <div class="board-column todo">
-        <div class="board-column-header">To do</div>
-        <div class="board-column-content" style="--length: {{tasks|length}}">
-          {% for i in range(tasks|length-1, -1, -1) %}
-            {% set task = tasks[i] %}
-            {% if task['priority_group'] == "TO DO" %}
-              <div class="board-item-container">
-                <div class="board-item draggable" style="--position: {{i}}" task_id="{{ task['id'] }}" board_id="{{ board_id }}">
-                  <section class="board-item-content">
-                    <span class="task">{{task.task}}</span>
-                    {% if task['assignees'] != "" %}
-                      <span class="assignees">{{task['assignees']}}</span>
-                    {% endif %}
-                  </section>
-                  <section class="board-item-edit">
-                    <form method="post" action="{{ url_for('kanban.update_task', id=task['id'], board_id=board_id) }}" style="display: inline">
-                      <button type="submit" name="group" value="DOING">🠖</button>
-                    </form>
-                    <form method="post" action="{{ url_for('kanban.delete_task', id=task['id'], board_id=board_id) }}" style="display: inline">
-                      <button class = "delete" type="submit" name="id" value="{{ task['id'] }}">❌</button>
-                    </form>
-                  </section>
-                </div>
-                <div class="board-item static" style="--position: {{i}}"></div>
-              </div>
-              {% endif %}
-            {% endfor %}
+      {% set groups = ["to do", "doing", "done"] %}
+      {% for group in groups %}
+        <div class="board-column {{ group.replace(' ', '') }}">
+          <div class="board-column-header">
+            <span class="title">{{ group }}</span>
+            <span class="add-task"><i class="fa fa-plus-circle"></i></span>
           </div>
-          <div class="container"></div>  
-        </div>
-        <div class="board-column working">
-            <div class="board-column-header">Doing</div>
-            <div class="board-column-content">
+          <div class="board-column-content" style="--length: {{tasks|length}}">
+            <div class="board-item-container new-task-container">
+              <form id="new-task" class="board-item" action="{{ url_for('kanban.create_task', board_id=board_id) }}" method="post">
+                <section class="board-item-content form-content">
+                  <input type="text" class="task task-input" name="task" placeholder="Task" required />
+                  <input type="text" class="assignees assignees-input" name="assignees" placeholder="Assignees"/>
+                </section>
+                <section class="board-item-edit">
+                  <button type="submit" class="fa fa-check check submit-button"></button>
+                  <button class="delete cancel-task">❌</button>
+                </section>
+              </form>
+            </div>
             {% for i in range(tasks|length-1, -1, -1) %}
               {% set task = tasks[i] %}
-                {% if task['priority_group'] == "DOING" %}
-                  <div class="board-item-container">
-                    <div class="board-item draggable" style="--position: {{i}}" task_id="{{ task['id'] }}" board_id="{{ board_id }}">
-                      <section class="board-item-content">
-                        <span class="task">{{task.task}}</span>
-                        {% if task['assignees'] != "" %}
-                          <span class="assignees">{{task['assignees']}}</span>
-                        {% endif %}
-                      </section>
-                      <section class="board-item-edit">
-                    <form method="post" action="{{ url_for('kanban.update_task', id=task['id'], board_id=board_id) }}" style="display: inline">
+              {% if task['priority_group'] == group.upper() %}
+                <div class="board-item-container">
+                  <div class="board-item draggable" 
+                  style="--position: {{i}}" 
+                  task_id="{{ task['id'] }}" 
+                  board_id="{{ board_id }}" 
+                  group="{{ group }}">
+                    <section class="board-item-content">
+                      <span class="task">{{task.task}}</span>
+                      {% if task['assignees'] != "" %}
+                        <span class="assignees">{{task['assignees']}}</span>
+                      {% endif %}
+                    </section>
+                    <section class="board-item-edit">
+                      {% if group == "to do" %}
+                        <form method="post" action="{{ url_for('kanban.update_task', id=task['id'], board_id=board_id) }}" style="display: inline">
+                          <button type="submit" name="group" value="DOING">🠖</button>
+                        </form>
+                        <form method="post" action="{{ url_for('kanban.delete_task', id=task['id'], board_id=board_id) }}" style="display: inline">
+                          <button class = "delete" type="submit" name="id" value="{{ task['id'] }}">❌</button>
+                        </form>
+                      {% elif group == "doing" %}
+                        <form method="post" action="{{ url_for('kanban.update_task', id=task['id'], board_id=board_id) }}" style="display: inline">
                           <button type="submit" name="group" value="TO DO">🠔</button>
                         </form>
                         <form method="post" action="{{ url_for('kanban.update_task', id=task['id'], board_id=board_id) }}" style="display: inline">
@@ -139,45 +131,24 @@
                         <form method="post" action="{{ url_for('kanban.delete_task', id=task['id'], board_id=board_id) }}" style="display: inline">
                           <button class = "delete" type="submit" name="id" value="{{ task['id'] }}">❌</button>
                         </form>
-                      </section>
-                    </div>
-                    <div class="board-item static" style="--position: {{i}}"></div>
-                  </div>
-                {% endif %}
-              {% endfor %}
-            </div>
-            <div class="container"></div>  
-        </div>
-        <div class="board-column done">
-            <div class="board-column-header">Done</div>
-            <div class="board-column-content">
-            {% for i in range(tasks|length-1, -1, -1) %}
-              {% set task = tasks[i] %}
-                {% if task['priority_group'] == "DONE" %}
-                <div class="board-item-container">
-                  <div class="board-item draggable" style="--position: {{i}}" task_id="{{ task['id'] }}" board_id="{{ board_id }}">
-                    <section class="board-item-content">
-                      <span class="task">{{task.task}}</span>
-                      {% if task['assignees'] != "" %}
-                        <span class="assignees">{{task['assignees']}}</span>
+                      {% else %}
+                        <form method="post" action="{{ url_for('kanban.update_task', id=task['id'], board_id=board_id) }}" style="display: inline">
+                          <button type="submit" name="group" value="DOING">🠔</button>
+                        </form>
+                        <form method="post" action="{{ url_for('kanban.delete_task', id=task['id'], board_id=board_id) }}" style="display: inline">
+                          <button class = "delete" type="submit" name="id" value="{{ task['id'] }}">❌</button>
+                        </form>
                       {% endif %}
-                    </section>
-                    <section class="board-item-edit">
-                      <form method="post" action="{{ url_for('kanban.update_task', id=task['id'], board_id=board_id) }}" style="display: inline">
-                        <button type="submit" name="group" value="DOING">🠔</button>
-                      </form>
-                      <form method="post" action="{{ url_for('kanban.delete_task', id=task['id'], board_id=board_id) }}" style="display: inline">
-                        <button class = "delete" type="submit" name="id" value="{{ task['id'] }}">❌</button>
-                      </form>
                     </section>
                   </div>
                   <div class="board-item static" style="--position: {{i}}"></div>
                 </div>
-                {% endif %}
-              {% endfor %}
-            </div>
-            <div class="container"></div>  
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="container" group = "{{ group }}"></div>  
         </div>
+      {% endfor %}
     </div>
   </section>
 {% endblock %}

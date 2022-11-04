@@ -150,7 +150,7 @@ body {
   color: #4a9cf9;
 }
 .board-menu .board-list {
-  display: none;
+  display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
@@ -159,6 +159,7 @@ body {
   padding: 30px;
   transition: 0.2s ease-in-out;
   width: 100%;
+  opacity: 0%;
 }
 .board-menu .board-list .board-list-title {
   margin: 30px 0px;
@@ -249,12 +250,80 @@ body {
 .board-menu .board-list .board-list-item .leave-board button:hover {
   color: red;
 }
-.new-task {
+
+.new-task-container {
+  /* position:!important;
+  top: -1; */
+  height: 100%;
+}
+
+#new-task {
+  /* display: none; */
+  cursor: default;
+  height: 10%;
+}
+#new-task .board-item-edit .submit-button, #new-task .board-item-edit .delete {
+    font-size: 12px;
+    outline: none;
+    border: none;
+    background-color: transparent;
+    margin: 3px;
+    transition: 0.2s ease-in-out;
+    cursor: pointer;
+    color: #9e9e9e;
+}
+#new-task .submit-button:hover {
+  color: rgb(0, 202, 0);
+  background-color: transparent;
+}
+#new-task .board-item-edit {
+  height: 100%;
+}
+#new-task .form-content {
+  margin-right: 20%;
+  height: 100%;
+}
+
+#new-task .form-content .task-input {
+  border-bottom: solid #9e9e9e4e 1px;
+  width: 100%;
+  height: 100%;
+  font-size: 14px;
+}
+
+#new-task .form-content .task-input:focus-within {
+  border-bottom: solid #4a9cf9 1px;
+}
+#new-task .form-content .assignees-input {
+  border-bottom: solid #9e9e9e4e 1px;
+  margin-top: 7px;
+  height: 100%;
+  font-size: 14px;
+}
+#new-task .form-content .assignees-input:focus-within {
+  border-bottom: solid #4a9cf9 1px;
+}
+.board-item-edit {
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
+}
+.board-item-edit button {
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  margin: 10px 1.5px 30px 0px;
+  border: none;
+  border-radius: 50%;
+  margin: 3px;
+  text-align: center;
+  font-size: 15px;
+  cursor: pointer;
+  background-color: transparent;
+  transition: 0.15s ease-in;
+}
+.board-item-edit .delete {
+  font-size: 12px;
 }
 .form-input {
   display: flex;
@@ -290,7 +359,7 @@ body {
 .form-submit .submit-button {
   width: 40px;
   height: 40px;
-  border: none;
+  border: solid black 1px;
   border-radius: 50%;
   text-align: center;
   font-size: 25px;
@@ -339,15 +408,41 @@ body {
   color: #fff;
   border-radius: 3px 3px 0 0;
   font-weight: 600;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
 }
 .board-column.todo .board-column-header {
-  background: #4a9cf9;
-}
-.board-column.working .board-column-header {
   background: #f9b94a;
+}
+.board-column.doing .board-column-header {
+  background: #4a9cf9;
 }
 .board-column.done .board-column-header {
   background: #2ac06d;
+}
+.board-column-header .add-task {
+  position: absolute;
+  font-size: 22px;
+  display: flex;
+  justify-content: flex-end;
+  padding: 25px;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+.board-column-header .add-task i {
+  cursor: pointer;
+  z-index: 1;
+  opacity: 60%;
+  transition: 0.2s ease-in-out;
+}
+.board-column-header .add-task i:hover {
+  opacity: 100%;
+}
+.board-column-header .add-task i:active {
+  opacity: 70%;
 }
 .board-column-content {
   position: relative;
@@ -355,18 +450,13 @@ body {
   min-height: 100px;
   display: flex;
   flex-direction:  column;
-  /* display: -ms-grid;
-  display: grid;
-  -ms-grid-rows: repeat(var(--length));
-  grid-template-rows: repeat(var(--length));
-  grid-row-gap: 7px;
-  grid-template-columns: 1fr; */
 }
 .board-item-container {
   display: flex;
   align-items: flex-start;
   justify-content: center;
   position: relative;
+  height: inherit;
 }
 .board-item {
   display: flex;
@@ -400,14 +490,26 @@ body {
   align-items: flex-start;
   justify-content: center;
   margin-right: 20px;
+  width: 100%;
 }
 .board-item-content .task {
   overflow: hidden;
   font-weight: 500;
+  outline: none;
+  font-family: 'BR Hendrix';
+  font-size: 17px;
+  border: transparent;
+  transition: 0.2s ease-in-out;
+  width: 100%;
 }
+
 .board-item-content .assignees {
   font-size: 12px;
   font-weight: 400;
+  outline: none;
+  font-family: 'BR Hendrix';
+  border: none;
+  width: 100%;
 }
 .board-item-edit {
   display: flex;
@@ -428,20 +530,9 @@ body {
   background-color: transparent;
   transition: 0.15s ease-in;
 }
-.board-item-edit .delete {
-  font-size: 12px;
-}
 .board-item-edit button:hover {
   background-color: #F0F0F0;
 }
-/* @media (max-width: 600px) {
-  .board-item-content {
-    text-align: center;
-  }
-  .board-item-content span {
-    display: none;
-  }
-} */
 .auth {
   display: flex;
   flex-direction: column;

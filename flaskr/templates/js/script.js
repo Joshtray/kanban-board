@@ -7,33 +7,25 @@ var static_holders = null
 window.addEventListener('load', function () {
   static_holders = document.getElementsByClassName("container")
   this.document.onmouseup = function(e) {
-    handleMouseUp(e, null)
+    handleMouseUp(e)
   }
   this.document.onmouseleave = function(e) {
-    handleMouseUp(e, null)
+    handleMouseUp(null)
   }
 
   const tasks = document.getElementsByClassName("board-item draggable");
 	for (let i = 0; i < tasks.length; i++) {
     var task = tasks[i];
 		task.onmousedown = function(e) {
-      handleMouseDown(e, tasks[i], table=tasks[i].parentElement.parentElement.parentElement.children[0].innerHTML)
+      handleMouseDown(e, tasks[i])
     }
 	}
-
-  const tables = this.document.getElementsByClassName("container");
-  for (let i = 0; i < tables.length; i++) {
-    var table = tables[i];
-    table.onmouseup = function(e) {
-      handleMouseUp(e, tables[i])
-    }
-  }
 })
 
-const handleMouseDown = (event, data, table) => {
+const handleMouseDown = (event, data) => {
   if (event.target.tagName != "BUTTON") {
-    prev_table = table
     mouseDownPos = data
+    prev_table = mouseDownPos.getAttribute("group")
     width = mouseDownPos.getBoundingClientRect().width;
     initTop = mouseDownPos.getBoundingClientRect().top - parseInt(window.getComputedStyle(mouseDownPos).marginTop)
     initLeft = mouseDownPos.getBoundingClientRect().left - parseInt(window.getComputedStyle(mouseDownPos).marginLeft)
@@ -61,42 +53,23 @@ const handleMouseDown = (event, data, table) => {
       mouseDownPos.style.left = (event.clientX - mouseDownPos.getBoundingClientRect().width/2) + "px";
     }
   }
-  const handleMouseUp = async (event, data) => {
+  const handleMouseUp = async (data) => {
     window.removeEventListener("mousemove", handleDrag)
     if (mouseDownPos) {
       const task_id = mouseDownPos.getAttribute("task_id")
       const board_id = mouseDownPos.getAttribute("board_id")
       console.log(board_id)
       mouseDownPos.style.transition = "0.2s ease-in-out"
-      if (data) {
-        target_table = data.parentElement.children[0].innerHTML
-        if (target_table != prev_table) {
-          const form = new FormData()
-          form.append("group", target_table)
-          
-          const response = await fetch(`{{ url_for('kanban.update_task') }}?id=${task_id}&board_id=${board_id}`, {
-            method: 'POST',
-            body: form,
-          });
-          return window.location.reload()
-        }
-        else {
-          for (let i = 0; i < static_holders.length; i++) {
-            var static_holder = static_holders[i];
-            static_holder.style.zIndex = 0
-          }
-          var static = mouseDownPos.parentElement.children[1];
-          mouseDownPos.style.zIndex = 1;
-          mouseDownPos.style.top = initTop + "px";
-          mouseDownPos.style.left = initLeft + "px";
-          setTimeout(function () {        
-            static.style.position = "absolute";
-            mouseDownPos.style.position = "revert";
-            mouseDownPos.style.width = "100%";
-            static.style.boxShadow = "none";
-            mouseDownPos = null;
-          }, parseFloat(getComputedStyle(mouseDownPos)['transitionDuration'])*1000)
-        }
+      const target_table = data?.target?.getAttribute("group")
+      if (target_table && target_table != prev_table) {
+        const form = new FormData()
+        form.append("group", target_table)
+        
+        const response = await fetch(`{{ url_for('kanban.update_task') }}?id=${task_id}&board_id=${board_id}`, {
+          method: 'POST',
+          body: form,
+        });
+        return window.location.reload()
       }
       else {
         for (let i = 0; i < static_holders.length; i++) {
@@ -112,7 +85,6 @@ const handleMouseDown = (event, data, table) => {
           mouseDownPos.style.position = "revert";
           mouseDownPos.style.width = "100%";
           static.style.boxShadow = "none";
-          mouseDownPos = null;
         }, parseFloat(getComputedStyle(mouseDownPos)['transitionDuration'])*1000)
       }
     }
@@ -126,14 +98,14 @@ const handleMouseDown = (event, data, table) => {
       menu.style.width = "30%";
       overlay.style.opacity = "20%";
       setTimeout(() => {
-        menu.children[0].style.display = "flex";
+        menu.children[0].style.opacity = "100%";
       }, parseFloat(getComputedStyle(overlay)['transitionDuration'])*1000);
     }, 50);
   }
   const close_menu = () => {
     menu = document.getElementById("board-menu")
     overlay = document.getElementById("overlay")
-    menu.children[0].style.display = "none";
+    menu.children[0].style.opacity = "0%";
     console.log(menu.children[0])
     menu.style.width = "0%";
     overlay.style.opacity = "0%";
@@ -154,6 +126,7 @@ const handleMouseDown = (event, data, table) => {
       parseFloat(getComputedStyle(element.parentElement)['transitionDuration'])*1000)
   }
   const add_board = (element) => {
+    console.log(element)
     element.style.display = "none";
     element.parentElement.children[0].style.display = "flex";
     setTimeout(()=> {
