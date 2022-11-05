@@ -246,8 +246,7 @@ const handleMouseDown = (event, data) => {
     console.log(user_id, board_id)
     const form = new FormData()
     form.append("remove_user_id", user_id);
-    form.append("board_id", board_id);
-    var response = await fetch(`{{ url_for('kanban.remove_user') }}`, {
+    var response = await fetch(`{{ url_for('kanban.remove_user') }}?board_id=${board_id}`, {
       method: 'POST',
       body:  form
     });

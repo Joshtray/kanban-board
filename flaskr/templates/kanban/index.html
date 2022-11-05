@@ -26,7 +26,12 @@
           {% endif %}
           <i title="Add user to board" class="fa fa-user-plus add-user board-icon" onclick="add_user(this)"></i>
           <hr width="1" size="30px" class="vl" />
-          <form title="Leave board" method="post" action="{{ url_for('kanban.leave_board', board_id=board_id, board_name=board_name ) }}" class="leave-board"><button class="board-icon" type="submit"><i class="fa fa-door-open"></i></button></form>
+          <form title="Leave board" method="post" 
+            action="{{ url_for('kanban.leave_board', board_id=board_id) }}" class="leave-board">
+            <button class="board-icon" type="submit" name="board_name" value="{{ board_name }}">
+              <i class="fa fa-door-open"></i>
+            </button>
+          </form>
         </section>
       </section>
       <form class="new-user" action="{{ url_for('kanban.add_user', board_id=board_id ) }}" method="post">
@@ -94,7 +99,9 @@
               <i class="fa fa-star"></i>
             {% endif %}
           </a>
-          <form method="post" action="{{ url_for('kanban.leave_board', board_id=board['id'], board_name=board_name) }}" class="leave-board"><button type="submit" class="gg-close"></button></form>
+          <form method="post" action="{{ url_for('kanban.leave_board', board_id=board['id']) }}" class="leave-board">
+            <button type="submit" name="board_name" value="{{ board_name }}" class="gg-close"></button>
+          </form>
         </span>
       {% endif %}
     {% endfor %}
@@ -112,14 +119,17 @@
           </div>
           <div class="board-column-content">
             <div class="board-item-container new-task-container">
-              <form class="board-item new-task" action="{{ url_for('kanban.create_task', board_id=board_id, group=group) }}" method="post">
+              <form class="board-item new-task" 
+                action="{{ url_for('kanban.create_task', board_id=board_id, group=group) }}" method="post">
                 <section class="board-item-content form-content">
                   <input type="text" class="task task-input" name="task" placeholder="Task" required />
                   <input type="text" class="assignees assignees-input" name="assignees" placeholder="Assignees"/>
                 </section>
                 <section class="board-item-edit">
                   <button type="submit" class="fa fa-check check submit-button"></button>
-                  <button title="Cancel" type="reset" class="cancel cancel-task" onclick="close_add_task(this)"><i class="fa fa-ban cancel"></i></button>
+                  <button title="Cancel" type="reset" class="cancel cancel-task" 
+                    onclick="close_add_task(this)">
+                  <i class="fa fa-ban cancel"></i></button>
                 </section>
               </form>
             </div>

@@ -817,10 +817,10 @@ body {
   display: flex;
 }
 .user-list .user-info .current {
-  border-bottom: solid #6e6e6e6e 4px;
+  border-bottom: solid #6e6e6e6e 2px;
 }
 .user-list .user-info:hover .current {
-  border-bottom: solid #4a9cf9 4px;
+  border-bottom: solid #4a9cf9 2px;
 }
 
 .auth {

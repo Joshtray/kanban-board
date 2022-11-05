@@ -85,6 +85,7 @@ def create_board():
 @bp.route('/rename-board', methods=['POST'])
 @login_required
 def rename_board():
+    user_id = session.get('user_id')
     board_id = request.args.get('board_id')
     board_name = request.form['board_name']
     
@@ -98,6 +99,13 @@ def rename_board():
         flash("Error: " + error)
     else:
         db = get_db()
+
+        admin_id = db.execute(
+            'SELECT admin_id FROM board b WHERE b.id = ?', (board_id,)
+        ).fetchone()[0]
+        if admin_id != user_id:
+            raise Exception(f"Only admins can rename the board")
+
         db.execute(
             'UPDATE board'
             ' SET name = ?'
@@ -111,7 +119,7 @@ def rename_board():
 def leave_board():
     user_id = session.get('user_id')
     board_id = request.args.get('board_id')
-    board_name = request.args.get('board_name')
+    board_name = request.form['board_name'] or "Board"
     error = None
     if not board_id:
         error = 'Board information is required.'
@@ -201,7 +209,7 @@ def add_user():
 def remove_user():
     user_id = session.get('user_id')
     remove_user_id = request.form['remove_user_id']
-    board_id = request.form['board_id']
+    board_id = request.args.get('board_id')
     error = None
     if not board_id:
         error = 'Board information is required.'
