@@ -14,7 +14,9 @@ CREATE TABLE user (
 
 CREATE TABLE board (
   id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
-  name TEXT NOT NULL
+  admin_id INTEGER,
+  name TEXT NOT NULL,
+  FOREIGN KEY (admin_id) REFERENCES user (id)
 );
 
 CREATE TABLE user_board (

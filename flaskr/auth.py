@@ -31,23 +31,32 @@ def register():
                 personal_board_id = db.execute(
                     'SELECT id FROM board b WHERE b.id = LAST_INSERT_ROWID()'
                 ).fetchone()[0]
-                print(personal_board_id, type(personal_board_id))
+
                 db.execute(
                     "INSERT INTO user (username, password, personal_board) VALUES (?, ?, ?)",
                     (username, generate_password_hash(password), personal_board_id)
                 )
+                user_id = db.execute(
+                    'SELECT id FROM user u WHERE u.id = LAST_INSERT_ROWID()'
+                ).fetchone()[0]
+                print(user_id)
+                db.execute(
+                    'UPDATE board SET admin_id = ? WHERE id = ?', (user_id, personal_board_id)
+                )
+                print(personal_board_id)
                 db.execute(
                     'INSERT INTO user_board (user_id, board_id)'
-                    ' VALUES (LAST_INSERT_ROWID(), ?)',
-                    (personal_board_id,)
+                    ' VALUES (?, ?)',
+                    (user_id, personal_board_id)
                 )
                 db.commit()
             except db.IntegrityError:
-                error = f"User {username} is already registered."
+                error = f"User {username} is already taken."
             else:
+                flash("Registration successful! Please log in.")
                 return redirect(url_for("auth.login"))
 
-        flash(error)
+        flash("Error: " + error)
 
     return render_template('auth/register.html')
 
@@ -72,7 +81,7 @@ def login():
             session['user_id'] = user['id']
             return redirect(url_for('index'))
 
-        flash(error)
+        flash("Error: " + error)
 
     return render_template('auth/login.html')
 

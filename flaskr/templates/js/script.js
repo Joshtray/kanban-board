@@ -3,6 +3,7 @@ var initTop = null
 var initLeft = null
 var prev_table = null
 var static_holders = null
+var board_title = null
 
 window.addEventListener('load', function () {
   static_holders = document.getElementsByClassName("container")
@@ -20,6 +21,17 @@ window.addEventListener('load', function () {
       handleMouseDown(e, tasks[i])
     }
 	}
+
+  const errors = document.getElementsByClassName("flash");
+  for (let i = 0; i < errors.length; i++) {
+    var error = errors[i];
+    setTimeout(function () {
+      error.style.opacity = "0%";
+      setTimeout(function () {
+        error.style.display = "none";
+      }, parseFloat(getComputedStyle(error)['transitionDuration'])*1000);
+    }, 4000);
+  }
 })
 
 const handleMouseDown = (event, data) => {
@@ -69,7 +81,7 @@ const handleMouseDown = (event, data) => {
           method: 'POST',
           body: form,
         });
-        return window.location.reload()
+        return window.location.reload();
       }
       else {
         for (let i = 0; i < static_holders.length; i++) {
@@ -140,5 +152,124 @@ const handleMouseDown = (event, data) => {
         parseFloat(getComputedStyle(element.parentElement.children[0])['transitionDuration'])*1000)
     }, 
       parseFloat(50))
+  }
+
+  const alt_options = (element) => {
+    console.log(element)
+    var options = element.closest(".options").getElementsByClassName("options-menu")[0]
+    if (!options.style.display || options.style.display == "none") {
+      options.style.display = "flex";
+      setTimeout(() => {
+        options.style.opacity = "100%";
+      }, 50);
+    }
+    else {
+      options.style.opacity = "0%";
+      setTimeout(() => {
+        options.style.display = "none";
+      }, parseFloat(getComputedStyle(options)['transitionDuration'])*1000);
+    }
+  }
+  const rename_board = (element) => {
+    var e = element.closest(".board-title").getElementsByClassName("board-name")[0]
+    var rename = document.createElement('input');
+    rename.setAttribute('type', 'text');
+    rename.setAttribute('class', e.className);
+    rename.setAttribute('value', e.innerText);
+    rename.style.width = parseFloat(getComputedStyle(e)['width']) + parseFloat(getComputedStyle(e)['marginLeft']) + "px";
+    e.parentNode.replaceChild(rename, e);
+    rename.focus();
+    rename.oninput = (e) => {
+      rename.setAttribute('value', e.target.value)
+    };
+    board_title = e;
+    alt_options(element)
+    options_icon = element.closest(".options").getElementsByClassName("load-options")[0];
+    options_icon.classList.remove("fa-ellipsis-h")
+    options_icon.classList.add("fa-check")
+    options_icon.onclick = () => {submit_rename(options_icon)}
+    console.log(options_icon)
+    
+  }
+  const submit_rename = async (element) => {
+    board_name = element.closest(".board-title").getElementsByClassName("board-name")[0]?.value
+    console.log(board_name)
+    board_id = element.closest(".board-title").getAttribute("board_id")
+    console.log(board_name, board_id)
+    
+    const form = new FormData()
+    form.append("board_name", board_name);
+
+    response = await fetch(`{{ url_for('kanban.rename_board') }}?board_id=${board_id}`, {
+      method: 'POST',
+      body: form
+    });
+    return window.location.reload()
+
+  }
+  const cancel_rename = (element) => {
+    console.log(element)
+    options_icon = element.closest(".board-title").getElementsByClassName("load-options")[0];
+    options_icon.classList.remove("fa-check")
+    options_icon.classList.add("fa-ellipsis-h")
+    options_icon.onclick = alt_options(options_icon)
+    console.log(options_icon)
+
+    var e = element.closest(".board-title").getElementsByClassName("board-name")[0]
+    
+    e.parentNode.replaceChild(board_title, e);
+    console.log(board_title)
+  }
+
+  const add_user = (element) => {
+    console.log(element)
+    add_user_form = element.closest(".board-title").getElementsByClassName("new-user")[0]
+    add_user_form.style.display = "flex";
+    setTimeout(() => {
+      add_user_form.style.top = "100%";
+      alt_options(element)
+    }, 50)
+  }
+  const close_add_user = (element) => {
+    console.log(element)
+    add_user_form = element.closest(".board-title").getElementsByClassName("new-user")[0]
+    add_user_form.style.top = "-50%";
+    setTimeout(() => {
+      add_user_form.style.display = "none";
+    }, parseFloat(getComputedStyle(add_user_form)["transitionDuration"])*1000)
+  }
+
+  const remove_user = async (element) => {
+    console.log(element)
+    user_id = element.closest(".user-info").getAttribute("user_id")
+    board_id = element.closest(".user-info").getAttribute("board_id")
+    console.log(user_id, board_id)
+    const form = new FormData()
+    form.append("remove_user_id", user_id);
+    form.append("board_id", board_id);
+    var response = await fetch(`{{ url_for('kanban.remove_user') }}`, {
+      method: 'POST',
+      body:  form
+    });
+    return window.location.reload()
+  }
+
+  const add_task = (element) => {
+    console.log(element)
+    column = element.closest(".board-column")
+    column.getElementsByClassName("new-task")[0].style.display = "flex";
+    setTimeout(() => {
+      column.getElementsByClassName("new-task")[0].style.opacity = "100%";
+
+    }
+    , 50)
+  }
+  const close_add_task = (element) => {
+    console.log(element)
+    column = element.closest(".board-column")
+    column.getElementsByClassName("new-task")[0].style.opacity = "0%";
+    setTimeout(() => {
+      column.getElementsByClassName("new-task")[0].style.display = "none";
+    }, parseFloat(getComputedStyle(column.getElementsByClassName("new-task")[0])['transitionDuration'])*1000)
   }
 

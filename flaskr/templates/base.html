@@ -1,15 +1,18 @@
 <!doctype html>
-<head>
-  <title>Kanban Board</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='font/stylesheet.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='icons/css/all.css') }}">
-  <link href='https://css.gg/close.css' rel='stylesheet'>
-  <script src="{{ url_for('kanban.script_js') }}"></script>
-</head>
-<section class="content">
-  <header>
-    {% block header %}{% endblock %}
-  </header>
-  {% block content %}{% endblock %}
-</section>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='font/stylesheet.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='icons/css/all.css') }}">
+    <link href="https://css.gg/close.css" rel="stylesheet">
+    <script src="{{ url_for('kanban.script_js') }}"></script>
+  </head>
+  <section class="content">
+    <header>
+      {% block header %}{% endblock %}
+    </header>
+    {% block content %}{% endblock %}
+  </section>
+</html>

@@ -10,7 +10,11 @@
     <h3 class="auth-info">Create your Kanban board!</h3>
     <form class="auth-form" method="post">
       {% for message in get_flashed_messages() %}
-        <div class="flash">{{ message }}</div>
+        {% if message.startswith("Error:") %}
+          <div class="flash error">{{ message }}</div>
+        {% else %}
+          <div class="flash success">{{ message }}</div>
+        {% endif %}
       {% endfor %}
       <section class="form-input">
         <label for="username">Username:</label>
