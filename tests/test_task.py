@@ -1,91 +1,179 @@
 # Test code sampled from https://flask.palletsprojects.com/en/2.2.x/tutorial/tests/
-
 import pytest
 from flaskr.db import get_db
+from furl import furl
 
-
-def test_index(client, auth):
-    response = client.get('/')
-    assert b"Log In" in response.data
-    assert b"Register" in response.data
-
-    auth.login()
-    response = client.get('/')
-    assert b'Kanban Board' in response.data
-    assert b'Log Out' in response.data
-    assert b'test\'s Board' in response.data 
-    # assert b'test title' in response.data
-    # assert b'by test on 2018-01-01' in response.data
-    # assert b'test\nbody' in response.data
-    # assert b'href="/1/update"' in response.data
-
-@pytest.mark.parametrize('path', (
-    '/create-board',
-    '/rename-board',
-    '/leave-board',
-    '/add-user',
-    '/remove-user',
-    '/create-task',
+@pytest.mark.parametrize(('path'), 
+    ('/create-task',
     '/update-task',
-    '/delete-task',
-))
-def test_login_required(client, path):
-    response = client.post(path)
-    assert response.headers["Location"] == "/login"
-
-
-def test_access_required(app, client, auth):
-    # change the board member to another user
-    with app.app_context():
-        db = get_db()
-        db.execute('UPDATE board SET admin_id = 2 WHERE id = 1')
-        db.execute('UPDATE user_board SET user_id = 2 WHERE board_id = 1')
-        db.commit()
-
-    auth.login()
-    # current user can't modify or leave another user's board
-    assert client.post('/rename-board?board_id=1').status_code == 403
-    assert client.post('/leave-board?board_id=1?board_name=').status_code == 403
-    # current user doesn't see edit link
-    assert b'"/update-task?id=1&board_id=1"' not in client.get('/').data
-    assert b'"update-task?id=1&board_id=1"' not in client.get('/').data
-    assert b'"/delete-task?id=1&board_id=1"' not in client.get('/').data
-
-
-@pytest.mark.parametrize('path', (
-    '/update-task?id=2&board_id=1',
-    '/delete-task?id=2&board_id=1',
-))
+    '/delete-task'),
+)
 def test_exists_required(client, auth, path):
     auth.login()
-    assert client.post(path).status_code == 404
+    response = client.post(path, query_string={'board_id': 10, 'id': 1, 'group': 'to do'}, data={'task': 'test task', 'assignees': 'test, other, three', 'group': 'to do'})
+    assert furl(response.location).args["error"]  == "404"
 
-def test_create(client, auth, app):
+    if path != '/create-task':
+        response = client.post(path, query_string={'board_id': 1, 'id': 1, 'group': 'to do'}, data={'task': 'test task', 'assignees': 'test, other, three', 'group': 'to do'})
+        assert furl(response.location).args["error"]  == "404"
+
+@pytest.mark.parametrize(('path'), 
+    ('/create-task',
+    '/update-task',
+    '/delete-task'),
+)
+def test_access_required(client, auth, app, path):
     auth.login()
-    client.post('/create-task', data={'title': 'created', 'body': ''})
+    
+    with app.app_context():
+        get_db().execute('INSERT INTO task (priority_group, task, assignees, board_id) VALUES ("TO DO", "test task", "test, other, three", 2)')
+        get_db().commit()
+
+
+    response = client.post( path, query_string={'board_id': 2, 'id': 1, 'group':"doing"}, data={'task': 'test task', 'assignees': 'test, other, three', 'group': 'doing'})
+    assert furl(response.location).args["error"]  == "403"
+
+def test_create_task(client, auth, app):
+    auth.login()
+    with app.app_context():
+        db = get_db()
+        count = db.execute('SELECT COUNT(id) FROM task WHERE board_id = 1').fetchone()[0]
+        assert count == 0
+
+    response = client.post('/create-task', query_string={'board_id': 1, 'group': 'to do'}, data={'task': 'test task', 'assignees': 'test, other, three'})
+    assert response.location == "/?board_id=1"
 
     with app.app_context():
         db = get_db()
-        count = db.execute('SELECT COUNT(id) FROM post').fetchone()[0]
-        assert count == 2
+        count = db.execute('SELECT COUNT(id) FROM task WHERE board_id = 1').fetchone()[0]
+        assert count == 1
 
-
-def test_update(client, auth, app):
-    auth.login()
-    assert client.get('/1/update').status_code == 200
-    client.post('/1/update', data={'title': 'updated', 'body': ''})
+    response = client.post('/create-task', query_string={"board_id": 1, "group": "done"}, 
+        data={'task': 'test task #2', 'assignees': 'test, other, three'})
+    assert response.location == "/?board_id=1"
 
     with app.app_context():
         db = get_db()
-        post = db.execute('SELECT * FROM post WHERE id = 1').fetchone()
-        assert post['title'] == 'updated'
+        tasks = db.execute('SELECT * FROM task WHERE board_id = 1 ORDER BY id').fetchall()
+        assert len(tasks) == 2
+        assert tasks[0]['task'] == 'test task'
+        assert tasks[0]['priority_group'].lower() == 'to do'
+        assert tasks[1]['task'] == 'test task #2'
+        assert tasks[1]['priority_group'].lower() == 'done'
 
-
-@pytest.mark.parametrize('path', (
-    '/create',
-    '/1/update',
-))
-def test_create_update_validate(client, auth, path):
+def test_create_task_invalid(client, auth, app):
     auth.login()
-    response = client.post(path, data={'title': '', 'body': ''})
-    assert b'Title is required.' in response.data
+    with app.app_context():
+        db = get_db()
+        count = db.execute('SELECT COUNT(id) FROM task WHERE board_id = 1').fetchone()[0]
+        assert count == 0
+
+    response = client.post('/create-task', query_string={"group": "to do"}, data={'task': 'test task', 'assignees': 'test, other, three'})
+    assert furl(response.location).args["error"]  == "400"
+
+    response = client.post('/create-task', query_string={"board_id": 1, "group": "to do"}, data={'task': '', 'assignees': 'test, other, three', 'group': 'to do'})
+    assert furl(response.location).args["board_id"] == "1"
+    assert furl(response.location).args["error"]  == "400"
+
+    response = client.post('/create-task', query_string={"board_id": 1, "group": "invalid"}, data={'task': 'test task', 'assignees': 'test, other, three', 'group': 'invalid'})
+    assert furl(response.location).args["board_id"] == "1"
+    assert furl(response.location).args["error"]  == "400"
+
+    response = client.post('/create-task', query_string={"board_id": 1, "group": ""}, data={'task': 'test task', 'assignees': 'test, other, three'})
+    assert furl(response.location).args["board_id"] == "1"
+    assert furl(response.location).args["error"]  == "400"
+
+
+    with app.app_context():
+        db = get_db()
+        count = db.execute('SELECT COUNT(id) FROM task WHERE board_id = 1').fetchone()[0]
+        assert count == 0
+
+def test_update_task(client, auth, app):
+    auth.login()
+    with app.app_context():
+        db = get_db()
+        db.execute('INSERT INTO task (priority_group, task, assignees, board_id) VALUES ("TO DO", "test task", "test, other, three", 1)')
+        db.commit()
+        count = db.execute('SELECT COUNT(id) FROM task WHERE board_id = 1').fetchone()[0]
+        assert count == 1
+
+    response = client.post('/update-task', query_string={"board_id": 1, "id": 1}, data={'task': 'test task', 'assignees': 'test, other, three', 'group': 'doing'})
+    assert response.location == "/?board_id=1"
+
+    with app.app_context():
+        db = get_db()
+        tasks = db.execute('SELECT * FROM task WHERE board_id = 1 ORDER BY id').fetchall()
+        assert len(tasks) == 1
+        assert tasks[0]['task'] == 'test task'
+        assert tasks[0]['priority_group'].lower() == 'doing'
+    
+
+def test_update_task_invalid(client, auth, app):
+    auth.login()
+    with app.app_context():
+        db = get_db()
+        db.execute('INSERT INTO task (priority_group, task, assignees, board_id) VALUES ("TO DO", "test task", "test, other, three", 1)')
+        db.commit()
+        count = db.execute('SELECT COUNT(id) FROM task WHERE board_id = 1').fetchone()[0]
+        assert count == 1
+
+    response = client.post('/update-task', query_string={"id": 1}, data={'group': 'doing'})
+    assert furl(response.location).args["error"]  == "400"
+
+    response = client.post('/update-task', query_string={"board_id": 1}, data={'group': 'doing'})
+    assert furl(response.location).args["board_id"] == "1"
+    assert furl(response.location).args["error"]  == "400"
+
+    response = client.post('/update-task', query_string={"board_id": 1, "id": 1}, data={'group': 'invalid'})
+    assert furl(response.location).args["board_id"] == "1"
+    assert furl(response.location).args["error"]  == "400"
+
+    response = client.post('/update-task', query_string={"board_id": 1, "id": 1}, data={'group': ''})
+    assert furl(response.location).args["board_id"] == "1"
+    assert furl(response.location).args["error"]  == "400"
+
+    with app.app_context():
+        db = get_db()
+        tasks = db.execute('SELECT * FROM task WHERE board_id = 1 ORDER BY id').fetchall()
+        assert len(tasks) == 1
+        assert tasks[0]['task'] == 'test task'
+        assert tasks[0]['priority_group'].lower() == 'to do'
+
+def test_delete_task(client, auth, app):
+    auth.login()
+    with app.app_context():
+        db = get_db()
+        db.execute('INSERT INTO task (priority_group, task, assignees, board_id) VALUES ("TO DO", "test task", "test, other, three", 1)')
+        db.commit()
+        count = db.execute('SELECT COUNT(id) FROM task WHERE board_id = 1').fetchone()[0]
+        assert count == 1
+
+    response = client.post('/delete-task', query_string={"board_id": 1, "id": 1})
+    assert response.location == "/?board_id=1"
+
+    with app.app_context():
+        db = get_db()
+        count = db.execute('SELECT COUNT(id) FROM task WHERE board_id = 1').fetchone()[0]
+        assert count == 0
+
+def test_delete_task_invalid(client, auth, app):
+    auth.login()
+    with app.app_context():
+        db = get_db()
+        db.execute('INSERT INTO task (priority_group, task, assignees, board_id) VALUES ("TO DO", "test task", "test, other, three", 1)')
+        db.commit()
+        count = db.execute('SELECT COUNT(id) FROM task WHERE board_id = 1').fetchone()[0]
+        assert count == 1
+
+    response = client.post('/delete-task', query_string={"id": 1})
+    assert furl(response.location).args["error"]  == "400"
+
+    response = client.post('/delete-task', query_string={"board_id": 1})
+    assert furl(response.location).args["board_id"] == "1"
+    assert furl(response.location).args["error"]  == "400"
+
+    with app.app_context():
+        db = get_db()
+        count = db.execute('SELECT COUNT(id) FROM task WHERE board_id = 1').fetchone()[0]
+        assert count == 1

@@ -28,7 +28,7 @@
           <hr width="1" size="30px" class="vl" />
           <form title="Leave board" method="post" 
             action="{{ url_for('kanban.leave_board', board_id=board_id) }}" class="leave-board">
-            <button class="board-icon" type="submit" name="board_name" value="{{ board_name }}">
+            <button class="board-icon" type="submit">
               <i class="fa fa-door-open"></i>
             </button>
           </form>
@@ -100,7 +100,7 @@
             {% endif %}
           </a>
           <form method="post" action="{{ url_for('kanban.leave_board', board_id=board['id']) }}" class="leave-board">
-            <button type="submit" name="board_name" value="{{ board_name }}" class="gg-close"></button>
+            <button type="submit" class="gg-close"></button>
           </form>
         </span>
       {% endif %}
@@ -188,16 +188,16 @@
       {% for user in board_users %}
       <section class="user-info " user_id="{{ user.id }}" board_id="{{ board_id }}">
         {% if g.user['id'] == board_admin and user['id'] != g.user['id'] %}
-          <i class="gg-close remove-user" onclick="remove_user(this)"></i>
+          <button class="remove-user" onclick="remove_user(this)">❌</button>
         {% endif %}
         {% if user['username'] == g.user['username'] %}
           <i class="fa fa-user user-icon current">
         {% else %}
           <i class="fa fa-user user-icon">
         {% endif %}
-          {% if user['id'] == board_admin %}
-            <i class="fa fa-star admin"></i>
-          {% endif %}
+        {% if user['id'] == board_admin %}
+          <i class="fa fa-star admin"></i>
+        {% endif %}
         </i>
         {% if user['username'] == g.user['username'] %}
           <span class="user-name">{{ user['username'] }} (you)</span>

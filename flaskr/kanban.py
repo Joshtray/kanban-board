@@ -4,6 +4,7 @@ from flask import (
 )
 
 from flaskr.auth import login_required
+import werkzeug.exceptions as exceptions
 from werkzeug.exceptions import abort
 
 
@@ -18,121 +19,154 @@ def script_js():
 @bp.route('/')
 @login_required
 def index():
-    user_id = session.get('user_id')
-    db = get_db()
-    personal_board = db.execute(
-        'SELECT u.personal_board FROM user u WHERE u.id = ?', (user_id,)
-    ).fetchone()[0]
+    try:
+        user_id = session.get('user_id')
+        error = request.args.get('error')
+        db = get_db()
 
-    board_id = request.args.get('board_id', personal_board)
+        boards = db.execute(
+            'SELECT ub.board_id as id, b.name, b.admin_id'
+            ' FROM user_board ub'
+            ' LEFT JOIN board as b'
+            ' ON ub.board_id = b.id' 
+            ' WHERE ub.user_id = ?', (user_id,)
+        ).fetchall()
 
-    (board_name, board_admin) = db.execute(
-        'SELECT b.name, b.admin_id FROM board b WHERE b.id = ?', (board_id,)
-    ).fetchone()
+        personal_board = db.execute(
+            'SELECT u.personal_board FROM user u WHERE u.id = ?', (user_id,)
+        ).fetchone()[0]
 
-    print(board_name, board_admin, user_id, type(board_admin), type(user_id))
-    tasks = db.execute(
-        'SELECT t.id, t.priority_group, t.task, t.assignees'
-        ' FROM board_task bt'
-        ' LEFT JOIN task t'
-        ' ON bt.task_id = t.id'
-        ' WHERE bt.board_id = ?', (board_id,)
-    ).fetchall()
-    boards = db.execute(
-        'SELECT ub.board_id as id, b.name, b.admin_id'
-        ' FROM user_board ub'
-        ' LEFT JOIN board as b'
-        ' ON ub.board_id = b.id' 
-        ' WHERE ub.user_id = ?', (user_id,)
-    ).fetchall()
-    board_users = db.execute(
-        'SELECT u.id, u.username'
-        ' FROM user_board ub'
-        ' LEFT JOIN user u'
-        ' ON ub.user_id = u.id'
-        ' WHERE ub.board_id = ?', (board_id,)
-    ).fetchall()
-    return render_template('kanban/index.html', tasks=tasks, boards=boards, board_id=board_id, board_name=board_name, board_users=board_users, board_admin=board_admin)
+        board_id = int(request.args.get('board_id', personal_board))
+
+        if board_id not in [b['id'] for b in boards]:
+            abort(403, f"User {user_id} doesn't have access to board {board_id}")
+
+        board_users = db.execute(
+            'SELECT u.id, u.username'
+            ' FROM user_board ub'
+            ' LEFT JOIN user u'
+            ' ON ub.user_id = u.id'
+            ' WHERE ub.board_id = ?', (board_id,)
+        ).fetchall()
+
+
+        (board_name, board_admin) = db.execute(
+            'SELECT b.name, b.admin_id FROM board b WHERE b.id = ?', (board_id,)
+        ).fetchone()
+
+        tasks = db.execute(
+            'SELECT t.id, t.priority_group, t.task, t.assignees'
+            ' FROM task t'
+            ' WHERE t.board_id = ?', (board_id,)
+
+        ).fetchall()
+        return render_template('kanban/index.html', tasks=tasks, boards=boards, board_id=board_id, board_name=board_name, board_users=board_users, board_admin=board_admin, error=error)
+    except Exception as e:
+        print(e)
+        if isinstance(e, exceptions.HTTPException):
+            print("WWF", e.description)
+            flash("Error: " + e.description)
+            return redirect(url_for('kanban.index', error=e.code))
+        raise e
 
 @bp.route('/create-board', methods=('POST',))
 @login_required
 def create_board():
     user_id = session.get('user_id')
     name = request.form['name']
-    error = None
+    try:
+        if not name:
+            abort(400, "Board name is required.")
+        else:
+            db = get_db()
+            db.execute(
+                'INSERT INTO board (name, admin_id)'
+                ' VALUES (?, ?)', (name, user_id))
+            board_id = db.execute(
+                'SELECT b.id FROM board b WHERE b.ROWID = LAST_INSERT_ROWID()'
+            ).fetchone()[0]
+            db.execute(
+                'INSERT INTO user_board (user_id, board_id)'
+                ' VALUES (?, ?)', (user_id, board_id))
+            db.commit()
+            flash(f"\"{name}\" created successfully!")
 
-    if not name:
-        error = 'Board name is required.'
+            return redirect(url_for('kanban.index', board_id=board_id))
+    except Exception as e:
+        if isinstance(e, exceptions.HTTPException):
+            flash("Error: " + e.description)
+            return redirect(url_for('kanban.index', error=e.code))
+        else:
+            raise e
 
-    if error is not None:
-        flash("Error: " + error)
-    else:
-        db = get_db()
-        db.execute(
-            'INSERT INTO board (name, admin_id)'
-            ' VALUES (?, ?)', (name, user_id))
-        board_id = db.execute(
-            'SELECT b.id FROM board b WHERE b.id = LAST_INSERT_ROWID()'
-        ).fetchone()
-        db.execute(
-            'INSERT INTO user_board (user_id, board_id)'
-            ' VALUES (?, LAST_INSERT_ROWID())', (user_id,))
-        db.commit()
-        flash(f"\"{name}\" created successfully!")
-
-    return redirect(url_for('kanban.index', board_id=board_id[0]))
-
-@bp.route('/rename-board', methods=['POST'])
+@bp.route('/rename-board', methods=('POST',))
 @login_required
 def rename_board():
     user_id = session.get('user_id')
     board_id = request.args.get('board_id')
     board_name = request.form['board_name']
-    
-    error = None
-    if not board_id:
-        error = 'Board id is required.'
-    elif not board_name:
-        error = 'Board name is required.'
 
-    if error is not None:
-        flash("Error: " + error)
-    else:
-        db = get_db()
+    try:
+        if not board_id:
+            abort(400, "Board id is required.")
+        elif not board_name:
+            abort(400, "Board name is required.")
 
-        admin_id = db.execute(
-            'SELECT admin_id FROM board b WHERE b.id = ?', (board_id,)
-        ).fetchone()[0]
-        if admin_id != user_id:
-            raise Exception(f"Only admins can rename the board")
+        else:
+            db = get_db()
 
-        db.execute(
-            'UPDATE board'
-            ' SET name = ?'
-            ' WHERE id = ?', (board_name, board_id))
-        db.commit()
-    return redirect(url_for('kanban.index', board_id=board_id))
+            board = db.execute(
+                'SELECT b.admin_id FROM board b WHERE b.id = ?', (board_id,)
+            ).fetchone()
+
+            if board is None:
+                abort(404, f"Board id {board_id} doesn't exist.")
+
+            if board['admin_id'] != user_id:
+                abort(403, "You are not the admin of this board.")
+
+            db.execute(
+                'UPDATE board SET name = ? WHERE id = ?', (board_name, board_id))
+            db.commit()
+            flash(f"\"{board_name}\" renamed successfully!")
+
+            return redirect(url_for('kanban.index', board_id=board_id))
+    except Exception as e:
+        if isinstance(e, exceptions.HTTPException):
+            print("Error: " + e.description)
+            flash("Error: " + e.description)
+            return redirect(url_for('kanban.index', board_id=board_id, error=e.code))
+        else:
+            raise e
 
 
-@bp.route('/leave-board', methods=['POST'])
+@bp.route('/leave-board', methods=('POST',))
 @login_required
 def leave_board():
     user_id = session.get('user_id')
     board_id = request.args.get('board_id')
-    board_name = request.form['board_name'] or "Board"
-    error = None
-    if not board_id:
-        error = 'Board information is required.'
 
-    if error is None:
-        try:
+    try: 
+        if not board_id:
+            abort(400, "Board id is required.")
+        else:
             db = get_db()
             personal_board = db.execute(
                 'SELECT u.personal_board FROM user u WHERE u.id = ?', (user_id,)
             ).fetchone()[0]
+
             if str(personal_board) == board_id:
-                raise Exception(f"You cannot leave your Personal Board")
+                abort(403, "You can't leave your personal board.")
             
+            board = db.execute(
+                'SELECT b.name FROM board b WHERE b.id = ?', (board_id,)
+            ).fetchone()
+
+            if board is None:
+                abort(404, f"Board id {board_id} doesn't exist.")
+            
+            board_name = board['name']
+
             db.execute(
                 'DELETE FROM user_board'
                 ' WHERE user_id = ? AND board_id = ?',
@@ -143,19 +177,21 @@ def leave_board():
             ).fetchone()[0]
             if remaining_users == 0:
                 db.execute(
-                    'DELETE FROM board_task WHERE board_id = ?', (board_id,)
+                    'DELETE FROM task WHERE board_id = ?', (board_id,)
                 )
                 db.execute(
                     'DELETE FROM board WHERE id = ?', (board_id,)
                 )
             db.commit()
-        except Exception as e:
-            error = str(e)
-    if error is not None:
-        flash("Error: " + error)
-    else:
-        flash(f"Successfully left \"{board_name}\"")
-    return redirect(url_for('kanban.index'))
+            flash(f"Successfully left \"{board_name}\"")
+            return redirect(url_for('kanban.index'))
+    except Exception as e:
+        if isinstance(e, exceptions.HTTPException):
+            flash("Error: " + e.description)
+            return redirect(url_for('kanban.index', board_id=board_id, error=e.code))
+        else:
+            raise e
+        
 
 @bp.route('/add-user', methods=['POST'])
 @login_required
@@ -163,32 +199,36 @@ def add_user():
     user_id = session.get('user_id')
     board_id = request.args.get('board_id')
     username = request.form['username']
-    error = None
-    if not board_id:
-        error = 'Board information is required.'
+    try: 
+        if not board_id:
+            abort(400, 'Board information is required.')
 
-    elif not username:
-        error = 'Username is required'
+        elif not username:
+            abort(400, 'Username is required')
 
-    if error is None:
-        try:
+        else:
             db = get_db()
-            print(username)
+
+            board_users = db.execute(
+                'SELECT ub.user_id FROM user_board ub'
+                ' WHERE ub.board_id = ?', (board_id,)
+            ).fetchall()
+            board_users = [user['user_id'] for user in board_users]
+            if user_id not in board_users:
+                abort(403, "You are not a member of this board")
+
             add_user_id = db.execute(
                 'SELECT u.id FROM user u WHERE u.username = ?', (username,)
             ).fetchone()
             if add_user_id == None:
-                raise Exception(f"User {username} not found.")
+                abort(404, f"User \"{username}\" not found.")
 
             add_user_id = add_user_id[0]
             if add_user_id == user_id:
-                raise Exception(f"Requested user is the same as current user.")
-            exist_user = db.execute(
-                'SELECT COUNT(*) FROM user_board ub'
-                ' WHERE ub.user_id = ? AND ub.board_id = ?', (add_user_id, board_id)).fetchone()[0]
+                abort(400, "You are already a member of this board")
             
-            if exist_user > 0:
-                raise Exception(f"User {username} already in board.")
+            if add_user_id in board_users:
+                abort(400, f"User \"{username}\" is already a member of this board")
             
             db.execute(
                 'INSERT INTO user_board (user_id, board_id)'
@@ -196,13 +236,14 @@ def add_user():
                 (add_user_id, board_id)
             )
             db.commit()
-        except Exception as e:
-            error = str(e)
-    if error is not None:
-        flash("Error: " + error)
-    else:
-        flash(f"User {username} added to board")
-    return redirect(url_for('kanban.index', board_id=board_id))
+            flash(f"User {username} added to board")
+            return redirect(url_for('kanban.index', board_id=board_id))
+    except Exception as e:
+        if isinstance(e, exceptions.HTTPException):
+            flash("Error: " + e.description)
+            return redirect(url_for('kanban.index', board_id=board_id, error=e.code))
+        else:
+            raise e
 
 @bp.route('/remove-user', methods=['POST'])
 @login_required
@@ -210,77 +251,92 @@ def remove_user():
     user_id = session.get('user_id')
     remove_user_id = request.form['remove_user_id']
     board_id = request.args.get('board_id')
-    error = None
-    if not board_id:
-        error = 'Board information is required.'
+    
+    try:
+        if not board_id:
+            abort(400, 'Board information is required.')
 
-    elif not remove_user_id:
-        error = 'No user to remove'
+        elif not remove_user_id:
+            abort(400, 'The requested user\'s id is required.')
 
-    if error is None:
-        try:
+        else:
             db = get_db()
-            admin_id = db.execute(
-                'SELECT admin_id FROM board b WHERE b.id = ?', (board_id,)
-            ).fetchone()[0]
-            print(admin_id)
-            if admin_id != user_id:
-                raise Exception(f"Only admins can remove users from the board")
-            if remove_user_id == user_id:
-                raise Exception(f"You cannot remove yourself from the board.")
-            if remove_user_id == admin_id:
-                raise Exception(f"You cannot remove the admin from the board.")
+            board = db.execute(
+                'SELECT b.admin_id FROM board b WHERE b.id = ?', (board_id,)
+            ).fetchone()
+            print(user_id, type(user_id), remove_user_id, type(remove_user_id))
+            if board is None:
+                abort(404, f"Board id {board_id} doesn't exist.")
+
+            if board['admin_id'] != user_id:
+                abort(403, "You are not the admin of this board.")
+
+            if remove_user_id == str(user_id):
+                abort(400, "You can't remove yourself from the board.")
+
             db.execute(
                 'DELETE FROM user_board'
                 ' WHERE user_id = ? AND board_id = ?',
                 (remove_user_id, board_id)
             )
             db.commit()
-        except Exception as e:
-            error = str(e)
-        
-    if error is not None:
-        flash("Error: " + error)
-    else:
-        flash(f"User removed from board")
-    return redirect(url_for('kanban.index', board_id=board_id))
+            flash(f"User removed from board")
+            return redirect(url_for('kanban.index', board_id=board_id))
+    except Exception as e:
+        if isinstance(e, exceptions.HTTPException):
+            flash("Error: " + e.description)
+            return redirect(url_for('kanban.index', board_id=board_id, error=e.code))
+        else:
+            raise e
 
-    
-    
 @bp.route('/create-task', methods=['POST'])
 @login_required
 def create_task():
+    user_id = session.get('user_id')
     board_id = request.args.get('board_id')
-    group = request.args.get('group').upper()
+    group = request.args.get('group')
     task = request.form['task']
     assignees = request.form['assignees']
-    error = None
 
-    if not task:
-        error = 'Task information is required.'
+    try:
+        if not task:
+            abort(400, 'Task information is required.')
 
-    if not group:
-        error = 'Task priority group is required.'
+        if not group:
+            abort(400, 'Task priority group is required.')
 
-    if not board_id:
-        error = 'Board information is required.'
+        group = group.upper()
+        if group not in ['TO DO', 'DOING', 'DONE']:
+            abort(400, 'Invalid task priority group.')
 
-    if error is not None:
-        flash("Error: " + error)
-    else:
-        db = get_db()
-        db.execute(
-            'INSERT INTO task (priority_group, task, assignees)'
-            ' VALUES (?, ?, ?)',
-            (group, task, assignees)
-        )
-        db.execute(
-            'INSERT INTO board_task (board_id, task_id)'
-            ' VALUES (?, LAST_INSERT_ROWID())',
-            (board_id,)
-        )
-        db.commit()
-    return redirect(url_for('kanban.index', board_id=board_id))
+        if not board_id:
+            abort(400, 'Board id is required.')
+        
+        get_board(board_id)
+
+        board_users = get_db().execute(
+            'SELECT ub.user_id FROM user_board ub'
+            ' WHERE ub.board_id = ?', (board_id,)
+        ).fetchall()
+        board_users = [user['user_id'] for user in board_users]
+        if user_id not in board_users:
+            abort(403, "You are not a member of this board")
+        
+        else:
+            db = get_db()
+            db.execute(
+                'INSERT INTO task (priority_group, task, assignees, board_id)'
+                ' VALUES (?, ?, ?, ?)',
+                (group, task, assignees, board_id)
+            )
+            db.commit()
+            return redirect(url_for('kanban.index', board_id=board_id))
+    except Exception as e:
+        if isinstance(e, exceptions.HTTPException):
+            flash("Error: " + e.description)
+            return redirect(url_for('kanban.index', board_id=board_id, error=e.code))
+        else:
+            raise e
 
 def get_task(id):
     task = get_db().execute(
@@ -295,35 +351,107 @@ def get_task(id):
 
     return task
 
+def get_board(id):
+    board = get_db().execute(
+        'SELECT b.id, b.name, b.admin_id'
+        ' FROM board b'
+        ' WHERE b.id = ?',
+        (id,)
+    ).fetchone()
+
+    if board is None:
+        abort(404, f"Board id {id} doesn't exist.")
+
+    return board
+
 @bp.route('/update-task', methods=['POST'])
 @login_required
 def update_task():
+    user_id = session.get('user_id')
     id = request.args.get('id')
     board_id = request.args.get('board_id')
-    task = get_task(id)
     group = request.form['group'].upper()
-    error = None
 
-    if error is not None:
-        flash("Error: " + error)
-    else:
-        db = get_db()
-        db.execute(
-            'UPDATE task SET priority_group = ?'
-            ' WHERE id = ?',
-            (group, id)
-        )
-        db.commit()
-    return redirect(url_for('kanban.index', board_id=board_id))
+    try:
+        if not id:
+            abort(400, 'Task id is required.')
+
+        if not group:
+            abort(400, 'Task priority group is required.')
+        
+        if not board_id:
+            abort(400, 'Board information is required.')
+        
+        get_board(board_id)
+        
+        get_task(id)
+
+        board_users = get_db().execute(
+            'SELECT ub.user_id FROM user_board ub'
+            ' WHERE ub.board_id = ?', (board_id,)
+        ).fetchall()
+        board_users = [user['user_id'] for user in board_users]
+        if user_id not in board_users:
+            abort(403, "You are not a member of this board")
+
+        if group not in ['TO DO', 'DOING', 'DONE']:
+            abort(400, 'Invalid task priority group.')
+
+        else:
+            db = get_db()
+            db.execute(
+                'UPDATE task SET priority_group = ?'
+                ' WHERE id = ?',
+                (group, id)
+            )
+            db.commit()
+            return redirect(url_for('kanban.index', board_id=board_id))
+    except Exception as e:
+        if isinstance(e, exceptions.HTTPException):
+            flash("Error: " + e.description)
+            return redirect(url_for('kanban.index', board_id=board_id, error=e.code))
+        else:
+            raise e
 
 @bp.route('/delete-task', methods=['POST'])
 @login_required
 def delete_task():
+    user_id = session.get('user_id')
     id = request.args.get('id')
     board_id = request.args.get('board_id')
-    get_task(id)
-    db = get_db()
-    db.execute('DELETE FROM task WHERE id = ?', (id,))
-    db.commit()
-    return redirect(url_for('kanban.index', board_id=board_id ))
+
+    try:
+        if not id:
+            abort(400, 'Task id is required.')
+
+        get_task(id)
+
+        if not board_id:
+            abort(400, 'Board id is required.')
+
+        get_board(board_id)
+        
+        board_users = get_db().execute(
+            'SELECT ub.user_id FROM user_board ub'
+            ' WHERE ub.board_id = ?', (board_id,)
+        ).fetchall()
+        board_users = [user['user_id'] for user in board_users]
+        if user_id not in board_users:
+            abort(403, "You are not a member of this board")
+
+        else:
+            db = get_db()
+            db.execute(
+                'DELETE FROM task'
+                ' WHERE id = ?',
+                (id,)
+            )
+            db.commit()
+            return redirect(url_for('kanban.index', board_id=board_id))
+    except Exception as e:
+        if isinstance(e, exceptions.HTTPException):
+            flash("Error: " + e.description)
+            return redirect(url_for('kanban.index', board_id=board_id, error=e.code))
+        else:
+            raise e
 

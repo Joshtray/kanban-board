@@ -74,14 +74,10 @@ const handleMouseDown = (event, data) => {
       mouseDownPos.style.transition = "0.2s ease-in-out"
       const target_table = data?.target?.getAttribute("group")
       if (target_table && target_table != prev_table) {
-        const form = new FormData()
-        form.append("group", target_table)
-        
-        const response = await fetch(`{{ url_for('kanban.update_task') }}?id=${task_id}&board_id=${board_id}`, {
-          method: 'POST',
-          body: form,
-        });
-        return window.location.reload();
+        data = {
+          "group": target_table
+        }
+        return post(`{{ url_for('kanban.update_task') }}?id=${task_id}&board_id=${board_id}`, data, "POST")
       }
       else {
         for (let i = 0; i < static_holders.length; i++) {
@@ -197,15 +193,8 @@ const handleMouseDown = (event, data) => {
     board_id = element.closest(".board-title").getAttribute("board_id")
     console.log(board_name, board_id)
     
-    const form = new FormData()
-    form.append("board_name", board_name);
-
-    response = await fetch(`{{ url_for('kanban.rename_board') }}?board_id=${board_id}`, {
-      method: 'POST',
-      body: form
-    });
-    return window.location.reload()
-
+    console.log(board_name, board_id)
+    return post(`{{ url_for("kanban.rename_board") }}?board_id=${board_id}`, {"board_name": board_name}, "POST")
   }
   const cancel_rename = (element) => {
     console.log(element)
@@ -244,13 +233,10 @@ const handleMouseDown = (event, data) => {
     user_id = element.closest(".user-info").getAttribute("user_id")
     board_id = element.closest(".user-info").getAttribute("board_id")
     console.log(user_id, board_id)
-    const form = new FormData()
-    form.append("remove_user_id", user_id);
-    var response = await fetch(`{{ url_for('kanban.remove_user') }}?board_id=${board_id}`, {
-      method: 'POST',
-      body:  form
-    });
-    return window.location.reload()
+    data = {
+      "remove_user_id": user_id
+    }
+    return post(`{{ url_for("kanban.remove_user") }}?board_id=${board_id}`, data, "POST")
   }
 
   const add_task = (element) => {
@@ -270,5 +256,26 @@ const handleMouseDown = (event, data) => {
     setTimeout(() => {
       column.getElementsByClassName("new-task")[0].style.display = "none";
     }, parseFloat(getComputedStyle(column.getElementsByClassName("new-task")[0])['transitionDuration'])*1000)
+  }
+
+  // Function is sampled from https://stackoverflow.com/questions/133925/javascript-post-request-like-a-form-submit
+  function post(path, params, method='post') {
+    const form = document.createElement('form');
+    form.method = method;
+    form.action = path;
+  
+    for (const key in params) {
+      if (params.hasOwnProperty(key)) {
+        const hiddenField = document.createElement('input');
+        hiddenField.type = 'hidden';
+        hiddenField.name = key;
+        hiddenField.value = params[key];
+  
+        form.appendChild(hiddenField);
+      }
+    }
+  
+    document.body.appendChild(form);
+    form.submit();
   }
 

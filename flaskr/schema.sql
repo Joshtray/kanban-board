@@ -1,7 +1,6 @@
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS board;
 DROP TABLE IF EXISTS user_board;
-DROP TABLE IF EXISTS board_task;
 DROP TABLE IF EXISTS task;
 
 CREATE TABLE user (
@@ -26,16 +25,11 @@ CREATE TABLE user_board (
   FOREIGN KEY (board_id) REFERENCES board (id)
 );
 
-CREATE TABLE board_task (
-  board_id INTEGER,
-  task_id INTEGER,
-  FOREIGN KEY (board_id) REFERENCES board (id)
-  FOREIGN KEY (task_id) REFERENCES task (id)
-);
-
 CREATE TABLE task (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   priority_group TEXT NOT NULL,
   task TEXT NOT NULL,
-  assignees TEXT NOT NULL
+  assignees TEXT NOT NULL,
+  board_id INTEGER,
+  FOREIGN KEY (board_id) REFERENCES board (id)
 );

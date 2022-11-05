@@ -786,14 +786,18 @@ body {
 .user-list .user-info:hover .remove-user {
   display: flex;
   color: red;
-  --ggs: 0.8;
+  font-size: 10px;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  z-index: 2;
+  cursor: pointer;
 }
 .user-list .user-info .remove-user:hover {
-  --ggs: 1;
+  font-size: 14px;
 }
 .user-list .user-info .user-icon {
   padding: 10px;
-  /* border-radius: 5px; */
   margin: 5px;
   position: relative;
 }
@@ -874,4 +878,15 @@ body {
 }
 .auth-form .switch-request a {
   margin: 5px;
+}
+
+@media only screen and (max-width: 750px) {
+  .kanban-board .board {
+    flex-direction: column;
+    width: 100%;
+  }
+  .kanban-board .board .board-column {
+    width: 100%;
+    margin: 0;
+  }
 }

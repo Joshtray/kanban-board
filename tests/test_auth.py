@@ -1,16 +1,16 @@
 # Test code sampled from https://flask.palletsprojects.com/en/2.2.x/tutorial/tests/
 import pytest
-from flask import g, session
+from flask import g, get_flashed_messages, session
 from flaskr.db import get_db
 
 
 def test_register(client, app):
     assert client.get('/register').status_code == 200
+
     response = client.post(
         '/register', data={'username': 'a', 'password': 'a'}
     )
     assert response.headers["Location"] == "/login"
-    assert b'Registration successful! Please log in.' in response.data
 
     with app.app_context():
         assert get_db().execute(
@@ -32,6 +32,7 @@ def test_register_validate_input(client, username, password, message):
 
 def test_login(client, auth):
     assert client.get('/login').status_code == 200
+
     response = auth.login()
     assert response.headers["Location"] == "/"
 
@@ -48,6 +49,20 @@ def test_login(client, auth):
 def test_login_validate_input(auth, username, password, message):
     response = auth.login(username, password)
     assert message in response.data
+
+@pytest.mark.parametrize('path', (
+    '/create-board',
+    '/rename-board',
+    '/leave-board',
+    '/add-user',
+    '/remove-user',
+    '/create-task',
+    '/update-task',
+    '/delete-task',
+))
+def test_login_required(client, path):
+    response = client.post(path)
+    assert response.location == "/login"
 
 def test_logout(client, auth):
     auth.login()
