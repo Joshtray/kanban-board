@@ -62,9 +62,7 @@ def index():
         ).fetchall()
         return render_template('kanban/index.html', tasks=tasks, boards=boards, board_id=board_id, board_name=board_name, board_users=board_users, board_admin=board_admin, error=error)
     except Exception as e:
-        print(e)
         if isinstance(e, exceptions.HTTPException):
-            print("WWF", e.description)
             flash("Error: " + e.description)
             return redirect(url_for('kanban.index', error=e.code))
         raise e
@@ -133,7 +131,6 @@ def rename_board():
             return redirect(url_for('kanban.index', board_id=board_id))
     except Exception as e:
         if isinstance(e, exceptions.HTTPException):
-            print("Error: " + e.description)
             flash("Error: " + e.description)
             return redirect(url_for('kanban.index', board_id=board_id, error=e.code))
         else:
@@ -264,7 +261,6 @@ def remove_user():
             board = db.execute(
                 'SELECT b.admin_id FROM board b WHERE b.id = ?', (board_id,)
             ).fetchone()
-            print(user_id, type(user_id), remove_user_id, type(remove_user_id))
             if board is None:
                 abort(404, f"Board id {board_id} doesn't exist.")
 

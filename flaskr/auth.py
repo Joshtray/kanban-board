@@ -31,7 +31,6 @@ def register():
                 personal_board_id = db.execute(
                     'SELECT id FROM board b WHERE b.ROWID = LAST_INSERT_ROWID()'
                 ).fetchone()[0]
-                print("PB", personal_board_id)
 
                 db.execute(
                     "INSERT INTO user (username, password, personal_board) VALUES (?, ?, ?)",
@@ -40,7 +39,6 @@ def register():
                 user_id = db.execute(
                     'SELECT id FROM user u WHERE u.ROWID = LAST_INSERT_ROWID()'
                 ).fetchone()[0]
-                print(user_id)
                 db.execute(
                     'UPDATE board SET admin_id = ? WHERE id = ?', (user_id, personal_board_id)
                 )
@@ -51,7 +49,6 @@ def register():
                 )
                 db.commit()
             except db.IntegrityError as e:
-                print("Ex", e)
                 error = f"User {username} is already taken."
             else:
                 flash("Registration successful! Please log in.")

@@ -4,7 +4,27 @@
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
+::-webkit-scrollbar {
+  width: 16px;
+}
 
+::-webkit-scrollbar-track {
+  background-color: #e4e4e4;
+  border-radius: 100px;
+  margin: 10px;
+  padding: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #9e9e9e;
+  border-radius: 100px;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  border: 5px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #4a9cf9;
+}
 a {
   color: #4a9cf9;
   text-decoration: underline;
@@ -78,7 +98,7 @@ h4 {
 
 .section-title {
   color: #2e64a1;
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
   margin: 40px 0;
   letter-spacing: 2px;
@@ -189,6 +209,7 @@ body {
   padding: 30px;
   transition: 0.2s ease-in-out;
   width: 100%;
+  --width: 30%;
   opacity: 0%;
 }
 .board-menu .board-list .board-list-title {
@@ -310,7 +331,7 @@ body {
 .nav-bar .board-nav .board-title .board-name {
   color: #4a9cf9;
   margin: 10px;
-  margin-right: 20px;
+  margin-right: 5px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -451,16 +472,16 @@ body {
 .nav-bar .board-nav .board-title .new-user .form-submit button:hover {
   color: #4a9cf9;
 }
-.new-task-container {
+.board-item-container.new-task-container {
   height: 100%;
+  display: none;
+  opacity: 0;
+  transition: 0.2s ease-in-out;
 }
 
 .new-task-container .new-task {
   cursor: default;
-  height: 10%;
-  display: none;
-  opacity: 0;
-  transition: 0.2s ease-in-out;
+  height: 100%;
 }
 .new-task-container .new-task .board-item-edit {
   height: 100%;
@@ -592,7 +613,6 @@ body {
   background: #f0f0f0;
   border-radius: 3px;
   position: relative;
-  /* z-index: 1; */
 }
 .board-column .container {
   position: absolute;
@@ -816,6 +836,7 @@ body {
 .user-list .user-info .user-name {
   display: none;
   font-size: 14px;
+  text-align: center;
 }
 .user-list .user-info:hover .user-name {
   display: flex;
@@ -880,13 +901,134 @@ body {
   margin: 5px;
 }
 
-@media only screen and (max-width: 750px) {
+@media only screen and (max-width: 950px) {
+  .board-menu .board-list {
+    --width: 100%;
+  }
+  .section-title {
+    font-size: 16px;
+  }
+  .nav-bar .board-nav {
+    position: absolute;
+    bottom: -60%;
+    width: 100%;
+  }
+  .nav-bar .board-nav .board-menu-button {
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 40px;
+    z-index: 3;
+    background-color: transparent;
+    border-bottom-right-radius: 15px;
+  }
+  .nav-bar .board-nav .board-menu-button:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+  .nav-bar .board-nav .board-title .board-name {
+    font-size: 25px;
+    margin-right: 10px;
+    margin-left: 0px;
+  }
   .kanban-board .board {
     flex-direction: column;
-    width: 100%;
+    align-items: center;
+    justify-content: center;
+    margin: 0px 10px 30px;
   }
   .kanban-board .board .board-column {
     width: 100%;
+    margin: 30px;
+  }
+  .kanban-board .board .board-column .board-column-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .kanban-board .board .board-column .board-item-container.main-container {
+    width: 45%;
+    margin: 10px;
+  }
+  .kanban-board .board .board-column .board-item-container .board-item-edit form button {
+    transform: rotate(90deg);
+  }
+  .new-task-container {
+    max-width: max-content;
+    width: 100%;
+  }
+  .nav-bar .board-nav .board-title .new-user {
     margin: 0;
   }
+  .account-nav span {
+    font-size: 16px;
+    letter-spacing: 0px;
+  }
+  .user-list {
+    z-index: 3;
+  }
+}
+@media only screen and (max-width: 650px) {
+  .nav-bar .board-nav .board-menu-button {
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 42px;
+    z-index: 3;
+    background-color: transparent;
+  }
+  
+  .nav-bar .board-nav {
+    position: absolute;
+    bottom: -40%;
+    width: 100%;
+  }
+  .section-title {
+    width: 100%;
+    text-align: left;
+    margin-left: 40px;
+  } 
+  .kanban-board .board .board-column {
+    margin: 60px;
+    margin-top: 0;
+  }
+  .main-flash {
+    z-index: 6;
+    margin-top: 75px;
+    margin-right: 50px;
+  }
+  .kanban-board .board .board-column .board-item-container.main-container {
+    margin: 5px 15px;
+  }
+  .board-item-edit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .board-item-edit form {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .board-item-edit form button {
+    height: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 3px;
+    text-align: center;
+    font-size: 14px;
+    cursor: pointer;
+    background-color: transparent;
+    transition: 0.15s ease-in;
+  }
+}
+.hidden-input {
+  display: none;
 }

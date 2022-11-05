@@ -70,7 +70,6 @@ const handleMouseDown = (event, data) => {
     if (mouseDownPos) {
       const task_id = mouseDownPos.getAttribute("task_id")
       const board_id = mouseDownPos.getAttribute("board_id")
-      console.log(board_id)
       mouseDownPos.style.transition = "0.2s ease-in-out"
       const target_table = data?.target?.getAttribute("group")
       if (target_table && target_table != prev_table) {
@@ -103,9 +102,9 @@ const handleMouseDown = (event, data) => {
     menu.style.display = "flex";
     overlay.style.display = "block";
     setTimeout(()=> {
-      menu.style.width = "30%";
       overlay.style.opacity = "20%";
       setTimeout(() => {
+        menu.style.width = getComputedStyle(menu.children[0]).getPropertyValue("--width");
         menu.children[0].style.opacity = "100%";
       }, parseFloat(getComputedStyle(overlay)['transitionDuration'])*1000);
     }, 50);
@@ -114,7 +113,6 @@ const handleMouseDown = (event, data) => {
     menu = document.getElementById("board-menu")
     overlay = document.getElementById("overlay")
     menu.children[0].style.opacity = "0%";
-    console.log(menu.children[0])
     menu.style.width = "0%";
     overlay.style.opacity = "0%";
     setTimeout(()=> {
@@ -134,7 +132,6 @@ const handleMouseDown = (event, data) => {
       parseFloat(getComputedStyle(element.parentElement)['transitionDuration'])*1000)
   }
   const add_board = (element) => {
-    console.log(element)
     element.style.display = "none";
     element.parentElement.children[0].style.display = "flex";
     setTimeout(()=> {
@@ -151,7 +148,6 @@ const handleMouseDown = (event, data) => {
   }
 
   const alt_options = (element) => {
-    console.log(element)
     var options = element.closest(".options").getElementsByClassName("options-menu")[0]
     if (!options.style.display || options.style.display == "none") {
       options.style.display = "flex";
@@ -184,34 +180,25 @@ const handleMouseDown = (event, data) => {
     options_icon.classList.remove("fa-ellipsis-h")
     options_icon.classList.add("fa-check")
     options_icon.onclick = () => {submit_rename(options_icon)}
-    console.log(options_icon)
     
   }
   const submit_rename = async (element) => {
     board_name = element.closest(".board-title").getElementsByClassName("board-name")[0]?.value
-    console.log(board_name)
     board_id = element.closest(".board-title").getAttribute("board_id")
-    console.log(board_name, board_id)
-    
-    console.log(board_name, board_id)
     return post(`{{ url_for("kanban.rename_board") }}?board_id=${board_id}`, {"board_name": board_name}, "POST")
   }
   const cancel_rename = (element) => {
-    console.log(element)
     options_icon = element.closest(".board-title").getElementsByClassName("load-options")[0];
     options_icon.classList.remove("fa-check")
     options_icon.classList.add("fa-ellipsis-h")
     options_icon.onclick = alt_options(options_icon)
-    console.log(options_icon)
 
     var e = element.closest(".board-title").getElementsByClassName("board-name")[0]
     
     e.parentNode.replaceChild(board_title, e);
-    console.log(board_title)
   }
 
   const add_user = (element) => {
-    console.log(element)
     add_user_form = element.closest(".board-title").getElementsByClassName("new-user")[0]
     add_user_form.style.display = "flex";
     setTimeout(() => {
@@ -220,7 +207,6 @@ const handleMouseDown = (event, data) => {
     }, 50)
   }
   const close_add_user = (element) => {
-    console.log(element)
     add_user_form = element.closest(".board-title").getElementsByClassName("new-user")[0]
     add_user_form.style.top = "-50%";
     setTimeout(() => {
@@ -229,10 +215,8 @@ const handleMouseDown = (event, data) => {
   }
 
   const remove_user = async (element) => {
-    console.log(element)
     user_id = element.closest(".user-info").getAttribute("user_id")
     board_id = element.closest(".user-info").getAttribute("board_id")
-    console.log(user_id, board_id)
     data = {
       "remove_user_id": user_id
     }
@@ -240,22 +224,20 @@ const handleMouseDown = (event, data) => {
   }
 
   const add_task = (element) => {
-    console.log(element)
     column = element.closest(".board-column")
-    column.getElementsByClassName("new-task")[0].style.display = "flex";
+    column.getElementsByClassName("new-task-container")[0].style.display = "flex";
     setTimeout(() => {
-      column.getElementsByClassName("new-task")[0].style.opacity = "100%";
+      column.getElementsByClassName("new-task-container")[0].style.opacity = "100%";
 
     }
     , 50)
   }
   const close_add_task = (element) => {
-    console.log(element)
     column = element.closest(".board-column")
-    column.getElementsByClassName("new-task")[0].style.opacity = "0%";
+    column.getElementsByClassName("new-task-container")[0].style.opacity = "0%";
     setTimeout(() => {
-      column.getElementsByClassName("new-task")[0].style.display = "none";
-    }, parseFloat(getComputedStyle(column.getElementsByClassName("new-task")[0])['transitionDuration'])*1000)
+      column.getElementsByClassName("new-task-container")[0].style.display = "none";
+    }, parseFloat(getComputedStyle(column.getElementsByClassName("new-task-container")[0])['transitionDuration'])*1000)
   }
 
   // Function is sampled from https://stackoverflow.com/questions/133925/javascript-post-request-like-a-form-submit

@@ -34,10 +34,11 @@
           </form>
         </section>
       </section>
-      <form class="new-user" action="{{ url_for('kanban.add_user', board_id=board_id ) }}" method="post">
+      <form class="new-user" action="{{ url_for('kanban.add_user', board_id=board_id ) }}" method="post" autocomplete="off">
+        <input autocomplete="false" name="hidden" type="text" class="hidden-input" title="hidden"/>
         <i class="fa fa-user"></i>
         <section class="form-input">
-          <input type="text" id="username" name="username" placeholder="Add User..." required />
+          <input type="text" id="username" name="username" placeholder="Add User..." autocomplete="off" required />
         </section>
         <section class="form-submit">
             <button title="Add user to board" type="submit" class="fa fa-plus"></button>
@@ -62,7 +63,7 @@
 
 {% block content %}
 <section class="overlay" id="overlay" onclick="close_menu()"></section>
-<section class="board-menu" id="board-menu">
+<section class="board-menu" id="board-menu" width="30%">
   <section class="board-list">
     <h3 class="board-list-title">Your Boards:</h3>
     <h4>Personal Board</h4>
@@ -136,7 +137,7 @@
             {% for i in range(tasks|length-1, -1, -1) %}
               {% set task = tasks[i] %}
               {% if task['priority_group'] == group.upper() %}
-                <div class="board-item-container">
+                <div class="board-item-container main-container">
                   <div class="board-item draggable"
                   task_id="{{ task['id'] }}" 
                   board_id="{{ board_id }}" 
@@ -186,7 +187,7 @@
     </div>
     <section class="user-list">
       {% for user in board_users %}
-      <section class="user-info " user_id="{{ user.id }}" board_id="{{ board_id }}">
+      <section class="user-info" user_id="{{ user.id }}" board_id="{{ board_id }}">
         {% if g.user['id'] == board_admin and user['id'] != g.user['id'] %}
           <button class="remove-user" onclick="remove_user(this)">❌</button>
         {% endif %}
