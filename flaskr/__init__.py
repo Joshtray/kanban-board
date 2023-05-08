@@ -13,7 +13,7 @@ def create_app(test_config=None):
     print(app.instance_path)
     app.config.from_mapping(
         SECRET_KEY='dev',
-        DATABASE=os.environ.get('DATABASE_URL'),
+        DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
     )
 
 
